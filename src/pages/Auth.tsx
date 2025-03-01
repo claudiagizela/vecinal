@@ -13,6 +13,7 @@ import { useForm } from 'react-hook-form';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Package } from 'lucide-react';
 import { Navigate } from 'react-router-dom';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const loginSchema = z.object({
   email: z.string().email({ message: 'Email inválido' }),
@@ -24,6 +25,9 @@ const signupSchema = z.object({
   email: z.string().email({ message: 'Email inválido' }),
   password: z.string().min(6, { message: 'La contraseña debe tener al menos 6 caracteres' }),
   confirmPassword: z.string(),
+  userType: z.enum(['guardia', 'vecino'], { 
+    required_error: 'Por favor selecciona el tipo de usuario' 
+  }),
 }).refine(data => data.password === data.confirmPassword, {
   message: 'Las contraseñas no coinciden',
   path: ['confirmPassword'],
@@ -51,6 +55,7 @@ const Auth = () => {
       email: '',
       password: '',
       confirmPassword: '',
+      userType: undefined,
     },
   });
 
@@ -59,7 +64,7 @@ const Auth = () => {
   };
 
   const onSignupSubmit = (data: SignupFormValues) => {
-    signUp(data.email, data.password, data.username);
+    signUp(data.email, data.password, data.username, data.userType);
   };
 
   if (user) {
@@ -167,6 +172,31 @@ const Auth = () => {
                             {...field} 
                           />
                         </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={signupForm.control}
+                    name="userType"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Tipo de Usuario</FormLabel>
+                        <Select
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Selecciona tipo de usuario" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="guardia">Guardia</SelectItem>
+                            <SelectItem value="vecino">Vecino</SelectItem>
+                          </SelectContent>
+                        </Select>
                         <FormMessage />
                       </FormItem>
                     )}

@@ -5,12 +5,14 @@ import { supabase } from '@/integrations/supabase/client';
 import { Session, User } from '@supabase/supabase-js';
 import { toast } from '@/hooks/use-toast';
 
+type UserType = 'guardia' | 'vecino';
+
 type AuthContextType = {
   session: Session | null;
   user: User | null;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<void>;
-  signUp: (email: string, password: string, username: string) => Promise<void>;
+  signUp: (email: string, password: string, username: string, userType?: UserType) => Promise<void>;
   signOut: () => Promise<void>;
 };
 
@@ -73,7 +75,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const signUp = async (email: string, password: string, username: string) => {
+  const signUp = async (email: string, password: string, username: string, userType: UserType = 'vecino') => {
     try {
       setLoading(true);
       const { error } = await supabase.auth.signUp({ 
@@ -82,6 +84,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         options: {
           data: {
             username,
+            role: userType
           }
         }
       });
