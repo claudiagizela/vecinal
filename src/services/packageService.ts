@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { Package, PackageFormData, PackageType, Company, RawPackageData } from '@/types/package';
 
@@ -90,7 +91,7 @@ export const createPackage = async (data: PackageFormData): Promise<string | und
         console.error('Error fetching neighbor data for email:', neighborError);
       } else if (neighborData) {
         // Use email if available, or mobile_number as fallback
-        const email = neighborData.email || `${neighborData.mobile_number}@example.com`;
+        const contactEmail = neighborData.email || `${neighborData.mobile_number}@example.com`;
         
         const response = await fetch(
           `https://mhrbnafcdadsqkrsfwdr.supabase.co/functions/v1/send-package-notification`,
@@ -104,7 +105,7 @@ export const createPackage = async (data: PackageFormData): Promise<string | und
               neighbor: {
                 name: neighborData.name,
                 last_name: neighborData.last_name,
-                email: email,
+                email: contactEmail,
               },
               package: {
                 id: newPackage.id,
@@ -223,7 +224,7 @@ export const markPackageAsDelivered = async (id: string): Promise<string> => {
         console.error('Error fetching neighbor data for email:', neighborError);
       } else if (neighborData) {
         // Use email if available, or mobile_number as fallback
-        const email = neighborData.email || `${neighborData.mobile_number}@example.com`;
+        const contactEmail = neighborData.email || `${neighborData.mobile_number}@example.com`;
         
         const response = await fetch(
           `https://mhrbnafcdadsqkrsfwdr.supabase.co/functions/v1/send-package-notification`,
@@ -237,7 +238,7 @@ export const markPackageAsDelivered = async (id: string): Promise<string> => {
               neighbor: {
                 name: neighborData.name,
                 last_name: neighborData.last_name,
-                email: email,
+                email: contactEmail,
               },
               package: {
                 id: packageData.id,

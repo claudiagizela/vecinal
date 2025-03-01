@@ -11,7 +11,8 @@ import {
   Trash2, 
   Search, 
   Home, 
-  Phone, 
+  Phone,
+  Mail,
   Layers3
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -99,6 +100,12 @@ const NeighborList: React.FC<NeighborListProps> = ({
                             <Phone size={14} className="mr-1" />
                             <span>{neighbor.mobile_number}</span>
                           </div>
+                          {neighbor.email && (
+                            <div className="flex items-center text-sm text-muted-foreground">
+                              <Mail size={14} className="mr-1" />
+                              <span>{neighbor.email}</span>
+                            </div>
+                          )}
                           <div className="flex items-center text-sm text-muted-foreground">
                             <Layers3 size={14} className="mr-1" />
                             <span>{neighbor.id.slice(0, 8)}</span>

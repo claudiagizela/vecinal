@@ -17,6 +17,7 @@ const formSchema = z.object({
   mobile_number: z.string()
     .min(10, 'El número debe tener al menos 10 dígitos')
     .regex(/^\d+$/, 'Solo se permiten números'),
+  email: z.string().email('Email inválido').optional().or(z.literal('')),
 });
 
 interface NeighborFormProps {
@@ -38,12 +39,14 @@ const NeighborForm: React.FC<NeighborFormProps> = ({
       second_last_name: initialData.second_last_name,
       apartment: initialData.apartment,
       mobile_number: initialData.mobile_number,
+      email: initialData.email || '',
     } : {
       name: '',
       last_name: '',
       second_last_name: '',
       apartment: '',
       mobile_number: '',
+      email: '',
     },
   });
 
@@ -111,10 +114,24 @@ const NeighborForm: React.FC<NeighborFormProps> = ({
             control={form.control}
             name="mobile_number"
             render={({ field }) => (
-              <FormItem className="md:col-span-2">
+              <FormItem>
                 <FormLabel>Número de Teléfono</FormLabel>
                 <FormControl>
                   <Input placeholder="5512345678" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          
+          <FormField
+            control={form.control}
+            name="email"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Correo Electrónico (opcional)</FormLabel>
+                <FormControl>
+                  <Input placeholder="correo@ejemplo.com" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
