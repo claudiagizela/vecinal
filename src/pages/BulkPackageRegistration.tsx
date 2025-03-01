@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { usePackages } from '@/context/PackageContext';
 import { useNeighbors } from '@/context/NeighborContext';
-import { Package as PackageIcon, Upload, ArrowLeft, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { Package as PackageIcon, Upload, ArrowLeft, AlertCircle, CheckCircle2, RefreshCw, Edit } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { toast } from '@/components/ui/use-toast';
@@ -11,6 +11,8 @@ import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { PackageFormData } from '@/types/package';
 import { useNavigate } from 'react-router-dom';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import PackageForm from '@/components/PackageForm';
 
 const BulkPackageRegistration = () => {
   const { addPackage } = usePackages();
@@ -23,8 +25,11 @@ const BulkPackageRegistration = () => {
     status: 'processing' | 'success' | 'error';
     packageData?: PackageFormData;
     errorMessage?: string;
+    confidenceScore?: number;
   }>>([]);
   const [uploadedCount, setUploadedCount] = useState(0);
+  const [manualItemId, setManualItemId] = useState<number | null>(null);
+  const [showManualForm, setShowManualForm] = useState(false);
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -66,6 +71,9 @@ const BulkPackageRegistration = () => {
       // Get timestamp from now (in a real implementation, this would come from image metadata)
       const now = new Date();
       
+      // Generate a random confidence score between 30% and 100%
+      const confidenceScore = Math.round((0.3 + Math.random() * 0.7) * 100);
+      
       // Randomly select a neighbor
       const randomNeighbor = neighbors[Math.floor(Math.random() * neighbors.length)];
       
@@ -73,7 +81,8 @@ const BulkPackageRegistration = () => {
         return {
           ...img,
           status: 'error' as const,
-          errorMessage: 'No se pudo reconocer la información del paquete'
+          errorMessage: 'No se pudo reconocer la información del paquete',
+          confidenceScore: Math.round(Math.random() * 40) // Low confidence for errors
         };
       }
       
@@ -92,7 +101,8 @@ const BulkPackageRegistration = () => {
       return {
         ...img,
         status: 'success' as const,
-        packageData
+        packageData,
+        confidenceScore
       };
     }));
     
@@ -148,6 +158,74 @@ const BulkPackageRegistration = () => {
 
   const clearAll = () => {
     setProcessedImages([]);
+  };
+
+  const handleRetryItem = (id: number) => {
+    const itemToRetry = processedImages.find(item => item.id === id);
+    if (itemToRetry) {
+      const itemsToProcess = [{ ...itemToRetry, status: 'processing' as const }];
+      
+      // Update status to processing
+      setProcessedImages(prev => 
+        prev.map(item => 
+          item.id === id ? { ...item, status: 'processing' } : item
+        )
+      );
+      
+      setIsProcessing(true);
+      processLabelImages(itemsToProcess);
+    }
+  };
+
+  const openManualForm = (id: number) => {
+    setManualItemId(id);
+    setShowManualForm(true);
+  };
+
+  const handleManualSubmit = (data: PackageFormData) => {
+    if (manualItemId) {
+      setProcessedImages(prev => 
+        prev.map(item => 
+          item.id === manualItemId ? {
+            ...item,
+            status: 'success',
+            packageData: data,
+            confidenceScore: 100 // Manual entry = 100% confidence
+          } : item
+        )
+      );
+    }
+    setShowManualForm(false);
+    setManualItemId(null);
+    
+    toast({
+      title: "Paquete actualizado",
+      description: "Datos del paquete actualizados manualmente.",
+    });
+  };
+
+  const getConfidenceBadge = (score?: number) => {
+    if (!score) return null;
+    
+    if (score >= 80) {
+      return (
+        <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+          Confianza alta ({score}%)
+        </Badge>
+      );
+    } else if (score >= 50) {
+      return (
+        <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200">
+          Confianza media ({score}%)
+        </Badge>
+      );
+    } else {
+      return (
+        <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">
+          Confianza baja ({score}%)
+        </Badge>
+      );
+    }
   };
 
   return (
@@ -272,23 +350,50 @@ const BulkPackageRegistration = () => {
                                     <div className="text-xs text-muted-foreground">
                                       Apto {neighbors.find(n => n.id === item.packageData?.neighbor_id)?.apartment} | {item.packageData.company}
                                     </div>
+                                    <div className="mt-1">
+                                      {getConfidenceBadge(item.confidenceScore)}
+                                    </div>
                                   </>
                                 )}
                                 {item.status === 'error' && (
-                                  <div className="text-destructive text-sm font-medium">
+                                  <div className="text-destructive text-sm font-medium mb-1">
                                     {item.errorMessage || 'Error al procesar'}
                                   </div>
                                 )}
                               </div>
+                              
                               {item.status === 'success' && (
-                                <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
-                                  Listo para registrar
-                                </Badge>
+                                <div className="flex flex-col gap-1">
+                                  <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                                    Listo para registrar
+                                  </Badge>
+                                  {item.confidenceScore && item.confidenceScore < 75 && (
+                                    <div className="flex gap-1 mt-1">
+                                      <Button variant="outline" size="sm" className="h-6 px-2" onClick={() => handleRetryItem(item.id)}>
+                                        <RefreshCw size={12} className="mr-1" /> Reintentar
+                                      </Button>
+                                      <Button variant="outline" size="sm" className="h-6 px-2" onClick={() => openManualForm(item.id)}>
+                                        <Edit size={12} className="mr-1" /> Editar
+                                      </Button>
+                                    </div>
+                                  )}
+                                </div>
                               )}
+                              
                               {item.status === 'error' && (
-                                <Badge variant="outline" className="bg-destructive/10 text-destructive border-destructive/20">
-                                  Error
-                                </Badge>
+                                <div className="flex flex-col gap-1">
+                                  <Badge variant="outline" className="bg-destructive/10 text-destructive border-destructive/20">
+                                    Error
+                                  </Badge>
+                                  <div className="flex gap-1 mt-1">
+                                    <Button variant="outline" size="sm" className="h-6 px-2" onClick={() => handleRetryItem(item.id)}>
+                                      <RefreshCw size={12} className="mr-1" /> Reintentar
+                                    </Button>
+                                    <Button variant="outline" size="sm" className="h-6 px-2" onClick={() => openManualForm(item.id)}>
+                                      <Edit size={12} className="mr-1" /> Manual
+                                    </Button>
+                                  </div>
+                                </div>
                               )}
                             </div>
                           </div>
@@ -323,6 +428,32 @@ const BulkPackageRegistration = () => {
           </div>
         </div>
       </main>
+
+      <Dialog open={showManualForm} onOpenChange={setShowManualForm}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Registro Manual de Paquete</DialogTitle>
+            <DialogDescription>
+              Ingresa los datos del paquete manualmente
+            </DialogDescription>
+          </DialogHeader>
+          
+          {manualItemId && (
+            <PackageForm
+              initialData={{
+                id: String(manualItemId),
+                type: 'caja',
+                received_date: new Date().toISOString(),
+                delivered_date: null,
+                company: 'otro',
+                neighbor_id: '',
+                images: [processedImages.find(i => i.id === manualItemId)?.image || '']
+              }}
+              onSubmit={handleManualSubmit}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
