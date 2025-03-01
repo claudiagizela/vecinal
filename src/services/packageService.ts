@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { Package, PackageFormData, PackageType, Company, RawPackageData } from '@/types/package';
 
@@ -93,14 +92,10 @@ export const createPackage = async (data: PackageFormData): Promise<string | und
         // Use email if available, or mobile_number as fallback
         const contactEmail = neighborData.email || `${neighborData.mobile_number}@example.com`;
         
-        const response = await fetch(
-          `https://mhrbnafcdadsqkrsfwdr.supabase.co/functions/v1/send-package-notification`,
+        // Call edge function using supabase.functions.invoke
+        const { data: responseData, error: responseError } = await supabase.functions.invoke(
+          'send-package-notification',
           {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1ocmJuYWZjZGFkc3FrcnNmd2RyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDA4NTc5MzEsImV4cCI6MjA1NjQzMzkzMX0.2W4LMuDUWS4TLyZ7hClUn-Ukvs00hSn_Qyug9FTE3N8`,
-            },
             body: JSON.stringify({
               neighbor: {
                 name: neighborData.name,
@@ -119,8 +114,8 @@ export const createPackage = async (data: PackageFormData): Promise<string | und
           }
         );
         
-        if (!response.ok) {
-          console.error('Error sending notification email:', await response.json());
+        if (responseError) {
+          console.error('Error sending notification email:', responseError);
         }
       }
     } catch (error) {
@@ -226,14 +221,10 @@ export const markPackageAsDelivered = async (id: string): Promise<string> => {
         // Use email if available, or mobile_number as fallback
         const contactEmail = neighborData.email || `${neighborData.mobile_number}@example.com`;
         
-        const response = await fetch(
-          `https://mhrbnafcdadsqkrsfwdr.supabase.co/functions/v1/send-package-notification`,
+        // Call edge function using supabase.functions.invoke
+        const { data: responseData, error: responseError } = await supabase.functions.invoke(
+          'send-package-notification',
           {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1ocmJuYWZjZGFkc3FrcnNmd2RyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDA4NTc5MzEsImV4cCI6MjA1NjQzMzkzMX0.2W4LMuDUWS4TLyZ7hClUn-Ukvs00hSn_Qyug9FTE3N8`,
-            },
             body: JSON.stringify({
               neighbor: {
                 name: neighborData.name,
@@ -252,8 +243,8 @@ export const markPackageAsDelivered = async (id: string): Promise<string> => {
           }
         );
         
-        if (!response.ok) {
-          console.error('Error sending delivery notification email:', await response.json());
+        if (responseError) {
+          console.error('Error sending delivery notification email:', responseError);
         }
       }
     }
