@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { usePackages } from '@/context/PackageContext';
 import Header from '@/components/Header';
@@ -8,7 +9,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Package as PackageIcon, PackageCheck } from 'lucide-react';
+import { Package as PackageIcon, PackageCheck, PackagePlus, ImageIcon } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
 
 const Packages = () => {
   const { packages, addPackage, updatePackage, deletePackage, getPackage, markAsDelivered, loading } = usePackages();
@@ -96,13 +99,21 @@ const Packages = () => {
               </div>
             </div>
             <div className="flex space-x-2">
-              <a href="/" className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2">
+              <Link to="/" className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2">
                 Vecinos
-              </a>
+              </Link>
+              <Link 
+                to="/bulk-packages"
+                className="inline-flex items-center justify-center rounded-md text-sm font-medium gap-2 ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2"
+              >
+                <ImageIcon size={16} />
+                Registro por Foto
+              </Link>
               <button 
                 onClick={handleOpenForm}
-                className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
+                className="inline-flex items-center justify-center rounded-md text-sm font-medium gap-2 ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
               >
+                <PackagePlus size={16} />
                 Registrar Paquete
               </button>
             </div>
