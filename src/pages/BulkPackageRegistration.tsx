@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { usePackages } from '@/context/PackageContext';
 import { useNeighbors } from '@/context/NeighborContext';
@@ -42,7 +41,6 @@ const BulkPackageRegistration = () => {
         reader.onloadend = () => {
           const base64 = reader.result as string;
           
-          // Add image to processing queue
           newProcessedImages.push({
             id: Date.now() + index,
             image: base64,
@@ -59,34 +57,22 @@ const BulkPackageRegistration = () => {
     }
   };
 
-  // Simulate processing images and extracting data
   const processLabelImages = async (images: typeof processedImages) => {
-    // In a real implementation, this would call an API for image processing
-    // For now, we'll simulate the process with random neighbor assignments
-
     const processedResults = await Promise.all(images.map(async (img) => {
-      // Simulate processing delay
       await new Promise(resolve => setTimeout(resolve, 1500 + Math.random() * 1000));
-      
-      // Get timestamp from now (in a real implementation, this would come from image metadata)
       const now = new Date();
-      
-      // Generate a random confidence score between 30% and 100%
       const confidenceScore = Math.round((0.3 + Math.random() * 0.7) * 100);
-      
-      // Randomly select a neighbor
       const randomNeighbor = neighbors[Math.floor(Math.random() * neighbors.length)];
       
-      if (!randomNeighbor || Math.random() < 0.2) { // 20% chance of error for demo
+      if (!randomNeighbor || Math.random() < 0.2) {
         return {
           ...img,
           status: 'error' as const,
           errorMessage: 'No se pudo reconocer la información del paquete',
-          confidenceScore: Math.round(Math.random() * 40) // Low confidence for errors
+          confidenceScore: Math.round(Math.random() * 40)
         };
       }
       
-      // Create package data
       const packageData: PackageFormData = {
         type: Math.random() > 0.5 ? 'caja' : Math.random() > 0.5 ? 'sobre' : 'bolsa',
         received_date: now.toISOString(),
@@ -115,7 +101,6 @@ const BulkPackageRegistration = () => {
     
     setIsProcessing(false);
     
-    // Count successful packages
     const successCount = processedResults.filter(item => item.status === 'success').length;
     if (successCount > 0) {
       setUploadedCount(prev => prev + successCount);
@@ -142,7 +127,6 @@ const BulkPackageRegistration = () => {
       description: `${successfulItems.length} paquetes han sido registrados exitosamente.`,
     });
     
-    // Clear registered packages from the list
     setProcessedImages(prev => 
       prev.filter(item => item.status !== 'success')
     );
@@ -165,7 +149,6 @@ const BulkPackageRegistration = () => {
     if (itemToRetry) {
       const itemsToProcess = [{ ...itemToRetry, status: 'processing' as const }];
       
-      // Update status to processing
       setProcessedImages(prev => 
         prev.map(item => 
           item.id === id ? { ...item, status: 'processing' } : item
@@ -190,7 +173,7 @@ const BulkPackageRegistration = () => {
             ...item,
             status: 'success',
             packageData: data,
-            confidenceScore: 100 // Manual entry = 100% confidence
+            confidenceScore: 100
           } : item
         )
       );
@@ -367,16 +350,14 @@ const BulkPackageRegistration = () => {
                                   <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
                                     Listo para registrar
                                   </Badge>
-                                  {item.confidenceScore && item.confidenceScore < 75 && (
-                                    <div className="flex gap-1 mt-1">
-                                      <Button variant="outline" size="sm" className="h-6 px-2" onClick={() => handleRetryItem(item.id)}>
-                                        <RefreshCw size={12} className="mr-1" /> Reintentar
-                                      </Button>
-                                      <Button variant="outline" size="sm" className="h-6 px-2" onClick={() => openManualForm(item.id)}>
-                                        <Edit size={12} className="mr-1" /> Editar
-                                      </Button>
-                                    </div>
-                                  )}
+                                  <div className="flex gap-1 mt-1">
+                                    <Button variant="outline" size="sm" className="h-6 px-2" onClick={() => handleRetryItem(item.id)}>
+                                      <RefreshCw size={12} className="mr-1" /> Reintentar
+                                    </Button>
+                                    <Button variant="outline" size="sm" className="h-6 px-2" onClick={() => openManualForm(item.id)}>
+                                      <Edit size={12} className="mr-1" /> Editar
+                                    </Button>
+                                  </div>
                                 </div>
                               )}
                               
