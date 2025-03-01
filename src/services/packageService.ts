@@ -7,5 +7,6 @@ export {
   updatePackageData,
   deletePackageData,
   markPackageAsDelivered,
-  markPackageAsPending
+  markPackageAsPending,
+  resendDeliveryNotification
 } from './packages';
