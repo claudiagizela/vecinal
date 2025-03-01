@@ -91,8 +91,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         title: "Registro exitoso",
         description: "Se ha enviado un correo de confirmación a tu dirección de email.",
       });
-
-      return data;
     } catch (error: any) {
       toast({
         title: "Error al registrarse",
@@ -118,8 +116,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         title: "Inicio de sesión exitoso",
         description: "Has iniciado sesión correctamente.",
       });
-
-      return data;
     } catch (error: any) {
       toast({
         title: "Error al iniciar sesión",

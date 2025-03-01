@@ -40,7 +40,7 @@ const SignupForm: React.FC = () => {
   });
 
   const onSubmit = (data: SignupFormValues) => {
-    signUp(data.email, data.password, data.username, data.userType);
+    signUp(data.email, data.password, data.userType);
   };
 
   return (
