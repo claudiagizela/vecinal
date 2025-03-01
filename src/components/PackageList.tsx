@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Package } from '@/types/package';
 import { Button } from '@/components/ui/button';
@@ -14,8 +13,7 @@ import {
   Check,
   Calendar,
   Building2,
-  RefreshCw,
-  Mail
+  RefreshCw
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
@@ -166,17 +164,6 @@ const PackageList: React.FC<PackageListProps> = ({
                       <div className="flex justify-end gap-2 mt-3">
                         {pkg.delivered_date ? (
                           <>
-                            {onResendNotification && (
-                              <Button
-                                size="icon"
-                                variant="outline"
-                                onClick={() => onResendNotification(pkg.id)}
-                                className="h-8 w-8 text-blue-600 border-blue-200 hover:bg-blue-50 hover:text-blue-700"
-                                title="Reenviar notificación de entrega"
-                              >
-                                <Mail size={16} />
-                              </Button>
-                            )}
                             {onMarkPending && (
                               <Button
                                 size="sm"

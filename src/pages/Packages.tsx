@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { usePackages } from '@/context/PackageContext';
 import Header from '@/components/Header';
@@ -23,7 +22,6 @@ const Packages = () => {
     getPackage, 
     markAsDelivered, 
     markAsPending, 
-    resendNotification, 
     loading 
   } = usePackages();
   const [formOpen, setFormOpen] = useState(false);
@@ -156,7 +154,6 @@ const Packages = () => {
               onDelete={deletePackage}
               onMarkDelivered={markAsDelivered}
               onMarkPending={markAsPending}
-              onResendNotification={resendNotification}
             />
           </div>
         </main>
