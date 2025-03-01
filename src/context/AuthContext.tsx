@@ -1,147 +1,178 @@
 
-import React, { createContext, useContext, useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { Session, User } from '@supabase/supabase-js';
-import { toast } from '@/hooks/use-toast';
+import { User, Session } from '@supabase/supabase-js';
+import { toast } from '@/components/ui/use-toast';
 
-type UserType = 'guardia' | 'vecino';
-
-type AuthContextType = {
-  session: Session | null;
+interface AuthContextType {
   user: User | null;
+  session: Session | null;
   loading: boolean;
+  signUp: (email: string, password: string, userType: 'vecino' | 'guardia') => Promise<void>;
   signIn: (email: string, password: string) => Promise<void>;
-  signUp: (email: string, password: string, username: string, userType?: UserType) => Promise<void>;
   signOut: () => Promise<void>;
-};
+  devModeEnabled: boolean;
+  toggleDevMode: () => void;
+}
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
+};
+
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
-  const navigate = useNavigate();
+  const [devModeEnabled, setDevModeEnabled] = useState(() => {
+    // Inicializar desde localStorage si existe
+    const saved = localStorage.getItem('devModeEnabled');
+    return saved ? JSON.parse(saved) : false;
+  });
 
   useEffect(() => {
-    const setupSession = async () => {
-      const { data } = await supabase.auth.getSession();
-      setSession(data.session);
-      setUser(data.session?.user || null);
-      setLoading(false);
+    // Guardar en localStorage cuando cambie
+    localStorage.setItem('devModeEnabled', JSON.stringify(devModeEnabled));
+  }, [devModeEnabled]);
 
-      const { data: authListener } = supabase.auth.onAuthStateChange(
-        async (event, session) => {
-          console.log('Auth state changed:', event);
-          setSession(session);
-          setUser(session?.user || null);
-          setLoading(false);
+  useEffect(() => {
+    // Establecer la sesión actual
+    const setInitialSession = async () => {
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        if (error) {
+          throw error;
         }
-      );
-
-      return () => {
-        authListener.subscription.unsubscribe();
-      };
+        setSession(session);
+        setUser(session?.user || null);
+      } catch (error) {
+        console.error('Error al recuperar la sesión:', error);
+      } finally {
+        setLoading(false);
+      }
     };
 
-    setupSession();
+    // Llamar a la función
+    setInitialSession();
+
+    // Escuchar los cambios de autenticación
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+      setUser(session?.user || null);
+      setLoading(false);
+    });
+
+    // Limpiar la suscripción
+    return () => subscription.unsubscribe();
   }, []);
 
-  const signIn = async (email: string, password: string) => {
+  const signUp = async (email: string, password: string, userType: 'vecino' | 'guardia') => {
     try {
-      setLoading(true);
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
-      
-      if (error) {
-        throw error;
-      }
-      
-      toast({
-        title: 'Bienvenido',
-        description: 'Has iniciado sesión correctamente',
-      });
-      
-      navigate('/');
-    } catch (error: any) {
-      toast({
-        title: 'Error al iniciar sesión',
-        description: error.message,
-        variant: 'destructive',
-      });
-      console.error('Error al iniciar sesión:', error.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const signUp = async (email: string, password: string, username: string, userType: UserType = 'vecino') => {
-    try {
-      setLoading(true);
-      const { error } = await supabase.auth.signUp({ 
-        email, 
+      const { data, error } = await supabase.auth.signUp({
+        email,
         password,
         options: {
           data: {
-            username,
             role: userType
           }
         }
       });
-      
+
       if (error) {
         throw error;
       }
-      
+
       toast({
-        title: 'Registro exitoso',
-        description: 'Por favor, verifica tu correo electrónico para confirmar tu cuenta',
+        title: "Registro exitoso",
+        description: "Se ha enviado un correo de confirmación a tu dirección de email.",
       });
-      
+
+      return data;
     } catch (error: any) {
       toast({
-        title: 'Error al registrarse',
-        description: error.message,
-        variant: 'destructive',
+        title: "Error al registrarse",
+        description: error.message || "Ha ocurrido un error al crear la cuenta.",
+        variant: "destructive"
       });
-      console.error('Error al registrarse:', error.message);
-    } finally {
-      setLoading(false);
+      throw error;
+    }
+  };
+
+  const signIn = async (email: string, password: string) => {
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      toast({
+        title: "Inicio de sesión exitoso",
+        description: "Has iniciado sesión correctamente.",
+      });
+
+      return data;
+    } catch (error: any) {
+      toast({
+        title: "Error al iniciar sesión",
+        description: error.message || "Email o contraseña incorrectos.",
+        variant: "destructive"
+      });
+      throw error;
     }
   };
 
   const signOut = async () => {
     try {
-      setLoading(true);
-      await supabase.auth.signOut();
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        throw error;
+      }
       toast({
-        title: 'Sesión cerrada',
-        description: 'Has cerrado sesión correctamente',
+        title: "Sesión cerrada",
+        description: "Has cerrado sesión correctamente.",
       });
-      navigate('/auth');
     } catch (error: any) {
       toast({
-        title: 'Error al cerrar sesión',
-        description: error.message,
-        variant: 'destructive',
+        title: "Error al cerrar sesión",
+        description: error.message || "Ha ocurrido un error al cerrar sesión.",
+        variant: "destructive"
       });
-      console.error('Error al cerrar sesión:', error.message);
-    } finally {
-      setLoading(false);
     }
   };
 
+  const toggleDevMode = () => {
+    setDevModeEnabled(prev => !prev);
+    toast({
+      title: devModeEnabled ? "Modo desarrollo desactivado" : "Modo desarrollo activado",
+      description: devModeEnabled 
+        ? "La autenticación está habilitada normalmente."
+        : "La autenticación ha sido temporalmente deshabilitada para desarrollo.",
+    });
+  };
+
   return (
-    <AuthContext.Provider value={{ session, user, loading, signIn, signUp, signOut }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        session,
+        loading,
+        signUp,
+        signIn,
+        signOut,
+        devModeEnabled,
+        toggleDevMode
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
-};
-
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error('useAuth debe ser usado dentro de un AuthProvider');
-  }
-  return context;
 };
