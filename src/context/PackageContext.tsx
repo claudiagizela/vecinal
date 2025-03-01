@@ -1,30 +1,18 @@
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { Package, PackageFormData, PackageType, Company, RawPackageData } from '@/types/package';
+import React, { useState, useEffect } from 'react';
+import { Package, PackageFormData } from '@/types/package';
 import { toast } from '@/components/ui/use-toast';
 import { useNeighbors } from './NeighborContext';
-import { supabase } from '@/integrations/supabase/client';
+import { PackageContext, PackageContextType } from '@/hooks/usePackageContext';
+import {
+  fetchPackagesWithImages,
+  createPackage,
+  updatePackageData,
+  deletePackageData,
+  markPackageAsDelivered
+} from '@/services/packageService';
 
-interface PackageContextType {
-  packages: Package[];
-  addPackage: (data: PackageFormData) => Promise<string | undefined>;
-  updatePackage: (id: string, data: PackageFormData) => Promise<void>;
-  deletePackage: (id: string) => Promise<void>;
-  getPackage: (id: string) => Package | undefined;
-  getNeighborPackages: (neighborId: string) => Package[];
-  markAsDelivered: (id: string) => Promise<void>;
-  loading: boolean;
-}
-
-const PackageContext = createContext<PackageContextType | undefined>(undefined);
-
-export const usePackages = () => {
-  const context = useContext(PackageContext);
-  if (!context) {
-    throw new Error('usePackages must be used within a PackageProvider');
-  }
-  return context;
-};
+export { usePackages } from '@/hooks/usePackageContext';
 
 export const PackageProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [packages, setPackages] = useState<Package[]>([]);
@@ -33,50 +21,13 @@ export const PackageProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
   // Load data from Supabase on mount
   useEffect(() => {
-    fetchPackages();
+    loadPackages();
   }, []);
 
-  const fetchPackages = async () => {
+  const loadPackages = async () => {
     try {
       setLoading(true);
-      
-      // Fetch packages
-      const { data: packagesData, error: packagesError } = await supabase
-        .from('packages')
-        .select('*')
-        .order('received_date', { ascending: false });
-      
-      if (packagesError) {
-        throw packagesError;
-      }
-      
-      // Fetch images for each package
-      const packagesWithImages = await Promise.all(
-        (packagesData || []).map(async (pkg: RawPackageData) => {
-          const { data: imagesData, error: imagesError } = await supabase
-            .from('package_images')
-            .select('image_url')
-            .eq('package_id', pkg.id);
-          
-          if (imagesError) {
-            console.error('Error fetching images for package:', imagesError);
-            return { 
-              ...pkg, 
-              type: pkg.type as PackageType,
-              company: pkg.company as Company,
-              images: [] 
-            } as Package;
-          }
-          
-          return { 
-            ...pkg, 
-            type: pkg.type as PackageType,
-            company: pkg.company as Company,
-            images: imagesData ? imagesData.map(img => img.image_url) : [] 
-          } as Package;
-        })
-      );
-      
+      const packagesWithImages = await fetchPackagesWithImages();
       setPackages(packagesWithImages);
     } catch (error) {
       console.error('Error fetching packages:', error);
@@ -101,58 +52,28 @@ export const PackageProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
   const addPackage = async (data: PackageFormData) => {
     try {
-      // First, insert the package
-      const { data: newPackage, error: packageError } = await supabase
-        .from('packages')
-        .insert([{
-          type: data.type,
-          received_date: data.received_date,
-          delivered_date: data.delivered_date,
-          company: data.company,
-          neighbor_id: data.neighbor_id
-        }])
-        .select()
-        .single();
+      const newPackageId = await createPackage(data);
       
-      if (packageError) {
-        throw packageError;
+      if (!newPackageId) return;
+      
+      // Fetch the newly created package with images
+      const { data: packageData } = await fetchPackagesWithImages();
+      const newPackage = packageData.find(p => p.id === newPackageId);
+      
+      if (newPackage) {
+        // Add to local state
+        setPackages((prev) => [newPackage, ...prev]);
+        
+        const neighbor = neighbors.find(n => n.id === data.neighbor_id);
+        const neighborName = neighbor ? `${neighbor.name} ${neighbor.last_name}` : 'Vecino';
+        
+        toast({
+          title: "Paquete registrado",
+          description: `Paquete de ${data.company} para ${neighborName} ha sido registrado.`,
+        });
       }
       
-      // Then, insert the images
-      if (data.images && data.images.length > 0) {
-        const imagesForInsert = data.images.map(image => ({
-          package_id: newPackage.id,
-          image_url: image
-        }));
-        
-        const { error: imagesError } = await supabase
-          .from('package_images')
-          .insert(imagesForInsert);
-        
-        if (imagesError) {
-          console.error('Error inserting package images:', imagesError);
-        }
-      }
-      
-      // Add to local state
-      const packageWithImages: Package = {
-        ...newPackage,
-        type: newPackage.type as PackageType,
-        company: newPackage.company as Company,
-        images: data.images || []
-      };
-      
-      setPackages((prev) => [packageWithImages, ...prev]);
-      
-      const neighbor = neighbors.find(n => n.id === data.neighbor_id);
-      const neighborName = neighbor ? `${neighbor.name} ${neighbor.last_name}` : 'Vecino';
-      
-      toast({
-        title: "Paquete registrado",
-        description: `Paquete de ${data.company} para ${neighborName} ha sido registrado.`,
-      });
-      
-      return newPackage.id;
+      return newPackageId;
     } catch (error) {
       console.error('Error adding package:', error);
       toast({
@@ -165,47 +86,7 @@ export const PackageProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
   const updatePackage = async (id: string, data: PackageFormData) => {
     try {
-      // First, update the package
-      const { error: packageError } = await supabase
-        .from('packages')
-        .update({
-          type: data.type,
-          received_date: data.received_date,
-          delivered_date: data.delivered_date,
-          company: data.company,
-          neighbor_id: data.neighbor_id
-        })
-        .eq('id', id);
-      
-      if (packageError) {
-        throw packageError;
-      }
-      
-      // Then, delete existing images
-      const { error: deleteImagesError } = await supabase
-        .from('package_images')
-        .delete()
-        .eq('package_id', id);
-      
-      if (deleteImagesError) {
-        console.error('Error deleting package images:', deleteImagesError);
-      }
-      
-      // Finally, insert new images
-      if (data.images && data.images.length > 0) {
-        const imagesForInsert = data.images.map(image => ({
-          package_id: id,
-          image_url: image
-        }));
-        
-        const { error: insertImagesError } = await supabase
-          .from('package_images')
-          .insert(imagesForInsert);
-        
-        if (insertImagesError) {
-          console.error('Error inserting package images:', insertImagesError);
-        }
-      }
+      await updatePackageData(id, data);
       
       // Update local state
       setPackages((prev) => 
@@ -232,15 +113,7 @@ export const PackageProvider: React.FC<{ children: React.ReactNode }> = ({ child
     try {
       const pkg = packages.find(p => p.id === id);
       
-      // Delete the package (cascades to images due to foreign key)
-      const { error } = await supabase
-        .from('packages')
-        .delete()
-        .eq('id', id);
-      
-      if (error) {
-        throw error;
-      }
+      await deletePackageData(id);
       
       // Update local state
       setPackages((prev) => prev.filter((p) => p.id !== id));
@@ -274,17 +147,7 @@ export const PackageProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
   const markAsDelivered = async (id: string) => {
     try {
-      const delivered_date = new Date().toISOString();
-      
-      // Update in database
-      const { error } = await supabase
-        .from('packages')
-        .update({ delivered_date })
-        .eq('id', id);
-      
-      if (error) {
-        throw error;
-      }
+      const delivered_date = await markPackageAsDelivered(id);
       
       // Update local state
       setPackages((prev) => 
@@ -313,19 +176,19 @@ export const PackageProvider: React.FC<{ children: React.ReactNode }> = ({ child
     }
   };
 
+  const contextValue: PackageContextType = {
+    packages: enrichedPackages,
+    addPackage,
+    updatePackage,
+    deletePackage,
+    getPackage,
+    getNeighborPackages,
+    markAsDelivered,
+    loading,
+  };
+
   return (
-    <PackageContext.Provider
-      value={{
-        packages: enrichedPackages,
-        addPackage,
-        updatePackage,
-        deletePackage,
-        getPackage,
-        getNeighborPackages,
-        markAsDelivered,
-        loading,
-      }}
-    >
+    <PackageContext.Provider value={contextValue}>
       {children}
     </PackageContext.Provider>
   );
