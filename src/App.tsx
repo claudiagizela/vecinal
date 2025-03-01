@@ -11,6 +11,7 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 import Neighbors from "./pages/Neighbors";
 import Packages from "./pages/Packages";
 import BulkPackageRegistration from "./pages/BulkPackageRegistration";
+import Users from "./pages/Users";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 
@@ -48,6 +49,14 @@ const App = () => (
                   element={
                     <ProtectedRoute>
                       <Neighbors />
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route 
+                  path="/users" 
+                  element={
+                    <ProtectedRoute>
+                      <Users />
                     </ProtectedRoute>
                   } 
                 />

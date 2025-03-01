@@ -3,7 +3,7 @@ import React from 'react';
 import { Users, Package, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useNeighbors } from '@/context/NeighborContext';
-import { useLocation, Link } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 
 interface HeaderProps {
@@ -37,35 +37,19 @@ const Header: React.FC<HeaderProps> = ({ onAddNew }) => {
             </div>
           </div>
           <div className="flex space-x-2 items-center">
-            {isNeighbors ? (
-              <>
-                <Link 
-                  to="/packages" 
-                  className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2 group"
-                >
-                  <Package size={18} className="mr-2 transition-transform group-hover:scale-110" />
-                  Paquetes
-                </Link>
-                <Button onClick={onAddNew} className="group">
+            <Button onClick={onAddNew} className="group">
+              {isNeighbors ? (
+                <>
                   <Users size={18} className="mr-2 transition-transform group-hover:scale-110" />
                   Agregar Vecino
-                </Button>
-              </>
-            ) : (
-              <>
-                <Link 
-                  to="/neighbors" 
-                  className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2 group"
-                >
-                  <Users size={18} className="mr-2 transition-transform group-hover:scale-110" />
-                  Vecinos
-                </Link>
-                <Button onClick={onAddNew} className="group">
+                </>
+              ) : (
+                <>
                   <Package size={18} className="mr-2 transition-transform group-hover:scale-110" />
                   Agregar Paquete
-                </Button>
-              </>
-            )}
+                </>
+              )}
+            </Button>
             
             {user && (
               <Button 
