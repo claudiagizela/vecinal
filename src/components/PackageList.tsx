@@ -80,6 +80,18 @@ const PackageList: React.FC<PackageListProps> = ({
     }
   };
 
+  const formatDateTime = (dateString: string) => {
+    try {
+      const date = new Date(dateString);
+      return {
+        date: format(date, 'PPP', { locale: es }),
+        time: format(date, 'HH:mm', { locale: es })
+      };
+    } catch (error) {
+      return { date: 'Fecha inválida', time: '' };
+    }
+  };
+
   const getPackageTypeIcon = (type: string) => {
     switch (type) {
       case 'caja':
@@ -149,14 +161,18 @@ const PackageList: React.FC<PackageListProps> = ({
                           <Building2 size={14} className="mr-1" />
                           <span>{pkg.company}</span>
                         </div>
-                        <div className="flex items-center text-muted-foreground">
+                        <div className="flex items-center text-muted-foreground col-span-2">
                           <Calendar size={14} className="mr-1" />
-                          <span>Recibido: {formatDate(pkg.received_date)}</span>
+                          <span>
+                            Recibido: {formatDateTime(pkg.received_date).date} a las {formatDateTime(pkg.received_date).time}
+                          </span>
                         </div>
                         {pkg.delivered_date && (
-                          <div className="flex items-center text-muted-foreground">
+                          <div className="flex items-center text-muted-foreground col-span-2">
                             <Check size={14} className="mr-1" />
-                            <span>Entregado: {formatDate(pkg.delivered_date)}</span>
+                            <span>
+                              Entregado: {formatDateTime(pkg.delivered_date).date} a las {formatDateTime(pkg.delivered_date).time}
+                            </span>
                           </div>
                         )}
                       </div>
