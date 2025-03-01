@@ -15,7 +15,7 @@ const Packages = () => {
   const { packages, addPackage, updatePackage, deletePackage, getPackage, markAsDelivered, loading } = usePackages();
   const [formOpen, setFormOpen] = useState(false);
   const [currentPackageId, setCurrentPackageId] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'all' | 'pending' | 'delivered'>('all');
+  const [activeTab, setActiveTab] = useState<'all' | 'pending' | 'delivered'>('pending');
 
   const filteredPackages = packages.filter(pkg => {
     if (activeTab === 'pending') return !pkg.delivered_date;
@@ -112,7 +112,7 @@ const Packages = () => {
       </div>
       
       <main className="max-w-7xl mx-auto px-6 pb-16 animate-fade-in">
-        <Tabs defaultValue="all" className="mb-6" onValueChange={(value) => setActiveTab(value as any)}>
+        <Tabs defaultValue="pending" className="mb-6" onValueChange={(value) => setActiveTab(value as any)}>
           <TabsList className="grid w-full grid-cols-3 md:w-auto md:inline-flex">
             <TabsTrigger value="all" className="flex items-center gap-2">
               <PackageIcon size={16} />
@@ -120,7 +120,7 @@ const Packages = () => {
             </TabsTrigger>
             <TabsTrigger value="pending" className="flex items-center gap-2">
               <PackageIcon size={16} />
-              <span>Pendientes ({pendingCount})</span>
+              <span>Recibidos ({pendingCount})</span>
             </TabsTrigger>
             <TabsTrigger value="delivered" className="flex items-center gap-2">
               <PackageCheck size={16} />
