@@ -103,7 +103,6 @@ const BulkPackageRegistration = () => {
     
     const successCount = processedResults.filter(item => item.status === 'success').length;
     if (successCount > 0) {
-      setUploadedCount(prev => prev + successCount);
       toast({
         title: "Procesamiento completado",
         description: `${successCount} de ${processedResults.length} paquetes fueron procesados correctamente.`,
@@ -111,25 +110,35 @@ const BulkPackageRegistration = () => {
     }
   };
 
-  const registerPackages = () => {
+  const registerPackages = async () => {
     const successfulItems = processedImages.filter(item => 
       item.status === 'success' && item.packageData
     );
     
-    successfulItems.forEach(item => {
+    let registeredCount = 0;
+    
+    for (const item of successfulItems) {
       if (item.packageData) {
-        addPackage(item.packageData);
+        try {
+          await addPackage(item.packageData);
+          registeredCount++;
+        } catch (error) {
+          console.error('Error registering package:', error);
+        }
       }
-    });
+    }
     
-    toast({
-      title: "Paquetes registrados",
-      description: `${successfulItems.length} paquetes han sido registrados exitosamente.`,
-    });
-    
-    setProcessedImages(prev => 
-      prev.filter(item => item.status !== 'success')
-    );
+    if (registeredCount > 0) {
+      setUploadedCount(prev => prev + registeredCount);
+      toast({
+        title: "Paquetes registrados",
+        description: `${registeredCount} paquetes han sido registrados exitosamente.`,
+      });
+      
+      setProcessedImages(prev => 
+        prev.filter(item => item.status !== 'success')
+      );
+    }
   };
 
   const retryFailedItems = () => {
@@ -165,7 +174,7 @@ const BulkPackageRegistration = () => {
     setShowManualForm(true);
   };
 
-  const handleManualSubmit = (data: PackageFormData) => {
+  const handleManualSubmit = async (data: PackageFormData) => {
     if (manualItemId) {
       setProcessedImages(prev => 
         prev.map(item => 

@@ -12,7 +12,8 @@ export interface Package {
   company: Company;
   neighbor_id: string;
   neighbor?: Neighbor;
-  images: string[]; // Base64 encoded image strings
+  images: string[]; // Base64 encoded image strings or URLs
+  created_at?: string;
 }
 
-export type PackageFormData = Omit<Package, 'id' | 'neighbor'>;
+export type PackageFormData = Omit<Package, 'id' | 'neighbor' | 'created_at'>;

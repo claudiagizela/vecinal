@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -45,7 +44,6 @@ interface PackageFormProps {
   onSubmit: (data: PackageFormData) => void;
 }
 
-// Convert base64 to blob for display
 const base64ToBlob = (base64: string): string => {
   return base64;
 };
@@ -54,7 +52,6 @@ const PackageForm: React.FC<PackageFormProps> = ({ initialData, onSubmit }) => {
   const { neighbors } = useNeighbors();
   const [previewImages, setPreviewImages] = useState<string[]>(initialData?.images || []);
   
-  // Split ISO date string into date and time parts
   const getDateParts = (isoString?: string | null) => {
     if (!isoString) return { date: '', time: '' };
     try {
@@ -110,7 +107,6 @@ const PackageForm: React.FC<PackageFormProps> = ({ initialData, onSubmit }) => {
   };
 
   const handleFormSubmit = (data: FormValues) => {
-    // Combine date and time into ISO string
     const receivedDateTime = new Date(`${data.received_date}T${data.received_time}`).toISOString();
     
     onSubmit({
@@ -256,7 +252,7 @@ const PackageForm: React.FC<PackageFormProps> = ({ initialData, onSubmit }) => {
               {previewImages.map((img, index) => (
                 <div key={index} className="relative rounded-md overflow-hidden h-24 bg-muted">
                   <img 
-                    src={base64ToBlob(img)} 
+                    src={img} 
                     alt={`Imagen ${index + 1}`} 
                     className="w-full h-full object-cover"
                   />

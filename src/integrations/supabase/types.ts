@@ -9,7 +9,103 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      neighbors: {
+        Row: {
+          apartment: string
+          created_at: string
+          id: string
+          last_name: string
+          mobile_number: string
+          name: string
+          second_last_name: string | null
+        }
+        Insert: {
+          apartment: string
+          created_at?: string
+          id?: string
+          last_name: string
+          mobile_number: string
+          name: string
+          second_last_name?: string | null
+        }
+        Update: {
+          apartment?: string
+          created_at?: string
+          id?: string
+          last_name?: string
+          mobile_number?: string
+          name?: string
+          second_last_name?: string | null
+        }
+        Relationships: []
+      }
+      package_images: {
+        Row: {
+          created_at: string
+          id: string
+          image_url: string
+          package_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          image_url: string
+          package_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          image_url?: string
+          package_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "package_images_package_id_fkey"
+            columns: ["package_id"]
+            isOneToOne: false
+            referencedRelation: "packages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      packages: {
+        Row: {
+          company: string
+          created_at: string
+          delivered_date: string | null
+          id: string
+          neighbor_id: string
+          received_date: string
+          type: string
+        }
+        Insert: {
+          company: string
+          created_at?: string
+          delivered_date?: string | null
+          id?: string
+          neighbor_id: string
+          received_date: string
+          type: string
+        }
+        Update: {
+          company?: string
+          created_at?: string
+          delivered_date?: string | null
+          id?: string
+          neighbor_id?: string
+          received_date?: string
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "packages_neighbor_id_fkey"
+            columns: ["neighbor_id"]
+            isOneToOne: false
+            referencedRelation: "neighbors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
