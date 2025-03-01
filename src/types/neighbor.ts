@@ -6,6 +6,9 @@ export interface Neighbor {
   second_last_name: string;
   apartment: string;
   mobile_number: string;
+  packages?: Package[];
 }
 
-export type NeighborFormData = Omit<Neighbor, 'id'>;
+export type NeighborFormData = Omit<Neighbor, 'id' | 'packages'>;
+
+import { Package } from "./package";
