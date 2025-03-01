@@ -3,7 +3,7 @@ import React from 'react';
 import { Users, Package, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useNeighbors } from '@/context/NeighborContext';
-import { useLocation } from 'react-router-dom';
+import { useLocation, Link } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 
 interface HeaderProps {
@@ -13,7 +13,8 @@ interface HeaderProps {
 const Header: React.FC<HeaderProps> = ({ onAddNew }) => {
   const { neighbors } = useNeighbors();
   const location = useLocation();
-  const isHome = location.pathname === '/';
+  const isHome = location.pathname === '/vecinos';
+  const isPackages = location.pathname === '/packages';
   const { user, signOut } = useAuth();
   
   return (
@@ -38,20 +39,32 @@ const Header: React.FC<HeaderProps> = ({ onAddNew }) => {
           <div className="flex space-x-2 items-center">
             {isHome ? (
               <>
-                <a href="/packages" className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2 group">
+                <Link 
+                  to="/packages" 
+                  className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2 group"
+                >
                   <Package size={18} className="mr-2 transition-transform group-hover:scale-110" />
                   Paquetes
-                </a>
+                </Link>
                 <Button onClick={onAddNew} className="group">
                   <Users size={18} className="mr-2 transition-transform group-hover:scale-110" />
                   Agregar Vecino
                 </Button>
               </>
             ) : (
-              <Button onClick={onAddNew} className="group">
-                <Package size={18} className="mr-2 transition-transform group-hover:scale-110" />
-                Agregar Paquete
-              </Button>
+              <>
+                <Link 
+                  to="/vecinos" 
+                  className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2 group"
+                >
+                  <Users size={18} className="mr-2 transition-transform group-hover:scale-110" />
+                  Vecinos
+                </Link>
+                <Button onClick={onAddNew} className="group">
+                  <Package size={18} className="mr-2 transition-transform group-hover:scale-110" />
+                  Agregar Paquete
+                </Button>
+              </>
             )}
             
             {user && (
