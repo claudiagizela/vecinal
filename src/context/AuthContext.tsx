@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { User, Session } from '@supabase/supabase-js';
@@ -11,6 +10,7 @@ interface AuthContextType {
   signUp: (email: string, password: string, userType: 'vecino' | 'guardia') => Promise<void>;
   signIn: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
+  resetPassword: (email: string) => Promise<void>;
   devModeEnabled: boolean;
   toggleDevMode: () => void;
 }
@@ -145,6 +145,32 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const resetPassword = async (email: string) => {
+    try {
+      setLoading(true);
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/auth`,
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      toast({
+        title: "Correo enviado",
+        description: "Se ha enviado un correo con instrucciones para restablecer tu contraseña.",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error al enviar el correo",
+        description: error.message || "Ha ocurrido un error al enviar el correo de recuperación.",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const toggleDevMode = () => {
     setDevModeEnabled(prev => !prev);
     toast({
@@ -164,6 +190,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         signUp,
         signIn,
         signOut,
+        resetPassword,
         devModeEnabled,
         toggleDevMode
       }}
