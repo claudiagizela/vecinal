@@ -7,11 +7,12 @@ export type Company = "Amazon" | "Mercado Libre" | "UPS" | "DHL" | "FedEx" | "Es
 export interface Package {
   id: string;
   type: PackageType;
-  received_date: string;
+  received_date: string; // Will store full ISO date with time
   delivered_date: string | null;
   company: Company;
   neighbor_id: string;
   neighbor?: Neighbor;
+  images: string[]; // Base64 encoded image strings
 }
 
 export type PackageFormData = Omit<Package, 'id' | 'neighbor'>;

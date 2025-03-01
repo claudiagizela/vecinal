@@ -64,6 +64,7 @@ export const PackageProvider: React.FC<{ children: React.ReactNode }> = ({ child
     const newPackage: Package = {
       ...data,
       id: uuidv4(),
+      images: data.images || [], // Ensure images array exists
     };
     
     setPackages((prev) => [...prev, newPackage]);
@@ -80,7 +81,7 @@ export const PackageProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const updatePackage = (id: string, data: PackageFormData) => {
     setPackages((prev) => 
       prev.map((pkg) => 
-        pkg.id === id ? { ...data, id } : pkg
+        pkg.id === id ? { ...data, id, images: data.images || [] } : pkg
       )
     );
     
