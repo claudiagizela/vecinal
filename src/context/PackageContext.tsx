@@ -57,8 +57,8 @@ export const PackageProvider: React.FC<{ children: React.ReactNode }> = ({ child
       if (!newPackageId) return;
       
       // Fetch the newly created package with images
-      const { data: packageData } = await fetchPackagesWithImages();
-      const newPackage = packageData.find(p => p.id === newPackageId);
+      const packagesData = await fetchPackagesWithImages();
+      const newPackage = packagesData.find(p => p.id === newPackageId);
       
       if (newPackage) {
         // Add to local state
