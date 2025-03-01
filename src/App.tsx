@@ -8,7 +8,7 @@ import { NeighborProvider } from "@/context/NeighborContext";
 import { PackageProvider } from "@/context/PackageContext";
 import { AuthProvider } from "@/context/AuthContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
-import Index from "./pages/Index";
+import Neighbors from "./pages/Neighbors";
 import Packages from "./pages/Packages";
 import BulkPackageRegistration from "./pages/BulkPackageRegistration";
 import Auth from "./pages/Auth";
@@ -44,10 +44,10 @@ const App = () => (
                   } 
                 />
                 <Route 
-                  path="/vecinos" 
+                  path="/neighbors" 
                   element={
                     <ProtectedRoute>
-                      <Index />
+                      <Neighbors />
                     </ProtectedRoute>
                   } 
                 />

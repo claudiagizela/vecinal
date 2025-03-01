@@ -13,7 +13,7 @@ interface HeaderProps {
 const Header: React.FC<HeaderProps> = ({ onAddNew }) => {
   const { neighbors } = useNeighbors();
   const location = useLocation();
-  const isHome = location.pathname === '/vecinos';
+  const isNeighbors = location.pathname === '/neighbors';
   const isPackages = location.pathname === '/packages';
   const { user, signOut } = useAuth();
   
@@ -23,21 +23,21 @@ const Header: React.FC<HeaderProps> = ({ onAddNew }) => {
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
             <div className="rounded-full bg-primary/10 p-2 text-primary">
-              {isHome ? <Users size={24} /> : <Package size={24} />}
+              {isNeighbors ? <Users size={24} /> : <Package size={24} />}
             </div>
             <div>
               <h1 className="text-xl font-medium">
-                {isHome ? 'Base de Datos de Vecinos' : 'Registro de Paquetes'}
+                {isNeighbors ? 'Base de Datos de Vecinos' : 'Registro de Paquetes'}
               </h1>
               <p className="text-sm text-muted-foreground">
-                {isHome 
+                {isNeighbors 
                   ? `${neighbors.length} ${neighbors.length === 1 ? 'vecino' : 'vecinos'} registrados`
                   : 'Gestión de paquetes de los vecinos'}
               </p>
             </div>
           </div>
           <div className="flex space-x-2 items-center">
-            {isHome ? (
+            {isNeighbors ? (
               <>
                 <Link 
                   to="/packages" 
@@ -54,7 +54,7 @@ const Header: React.FC<HeaderProps> = ({ onAddNew }) => {
             ) : (
               <>
                 <Link 
-                  to="/vecinos" 
+                  to="/neighbors" 
                   className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2 group"
                 >
                   <Users size={18} className="mr-2 transition-transform group-hover:scale-110" />
