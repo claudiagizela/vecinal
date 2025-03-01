@@ -151,3 +151,15 @@ export const markPackageAsDelivered = async (id: string): Promise<string> => {
   
   return delivered_date;
 };
+
+export const markPackageAsPending = async (id: string): Promise<void> => {
+  // Update in database, setting delivered_date to null
+  const { error } = await supabase
+    .from('packages')
+    .update({ delivered_date: null })
+    .eq('id', id);
+  
+  if (error) {
+    throw error;
+  }
+};

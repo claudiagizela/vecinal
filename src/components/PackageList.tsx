@@ -13,7 +13,8 @@ import {
   Trash2, 
   Check,
   Calendar,
-  Building2
+  Building2,
+  RefreshCw
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
@@ -34,6 +35,7 @@ interface PackageListProps {
   onEdit: (id: string) => void;
   onDelete: (id: string) => void;
   onMarkDelivered: (id: string) => void;
+  onMarkPending?: (id: string) => void;
   className?: string;
 }
 
@@ -42,6 +44,7 @@ const PackageList: React.FC<PackageListProps> = ({
   onEdit,
   onDelete,
   onMarkDelivered,
+  onMarkPending,
   className,
 }) => {
   const [search, setSearch] = useState('');
@@ -158,7 +161,18 @@ const PackageList: React.FC<PackageListProps> = ({
                       </div>
                       
                       <div className="flex justify-end gap-2 mt-3">
-                        {!pkg.delivered_date && (
+                        {pkg.delivered_date ? (
+                          onMarkPending && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => onMarkPending(pkg.id)}
+                              className="h-8 text-amber-600 border-amber-200 hover:bg-amber-50 hover:text-amber-700"
+                            >
+                              <RefreshCw size={14} className="mr-1" /> Marcar como pendiente
+                            </Button>
+                          )
+                        ) : (
                           <Button
                             size="sm"
                             variant="outline"

@@ -14,7 +14,7 @@ import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 
 const Packages = () => {
-  const { packages, addPackage, updatePackage, deletePackage, getPackage, markAsDelivered, loading } = usePackages();
+  const { packages, addPackage, updatePackage, deletePackage, getPackage, markAsDelivered, markAsPending, loading } = usePackages();
   const [formOpen, setFormOpen] = useState(false);
   const [currentPackageId, setCurrentPackageId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'pending' | 'delivered'>('pending');
@@ -141,6 +141,7 @@ const Packages = () => {
             onEdit={handleEditPackage}
             onDelete={deletePackage}
             onMarkDelivered={markAsDelivered}
+            onMarkPending={markAsPending}
           />
         </div>
       </main>

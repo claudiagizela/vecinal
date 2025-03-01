@@ -10,6 +10,7 @@ export interface PackageContextType {
   getPackage: (id: string) => Package | undefined;
   getNeighborPackages: (neighborId: string) => Package[];
   markAsDelivered: (id: string) => Promise<void>;
+  markAsPending: (id: string) => Promise<void>;
   loading: boolean;
 }
 

@@ -9,7 +9,8 @@ import {
   createPackage,
   updatePackageData,
   deletePackageData,
-  markPackageAsDelivered
+  markPackageAsDelivered,
+  markPackageAsPending
 } from '@/services/packageService';
 
 export { usePackages } from '@/hooks/usePackageContext';
@@ -176,6 +177,37 @@ export const PackageProvider: React.FC<{ children: React.ReactNode }> = ({ child
     }
   };
 
+  const markAsPending = async (id: string) => {
+    try {
+      await markPackageAsPending(id);
+      
+      // Update local state
+      setPackages((prev) => 
+        prev.map((pkg) => 
+          pkg.id === id ? { ...pkg, delivered_date: null } : pkg
+        )
+      );
+      
+      const pkg = packages.find(p => p.id === id);
+      if (pkg) {
+        const neighbor = neighbors.find(n => n.id === pkg.neighbor_id);
+        const neighborName = neighbor ? `${neighbor.name} ${neighbor.last_name}` : 'Vecino';
+        
+        toast({
+          title: "Paquete pendiente",
+          description: `El paquete de ${pkg.company} para ${neighborName} ha sido marcado como pendiente nuevamente.`,
+        });
+      }
+    } catch (error) {
+      console.error('Error marking package as pending:', error);
+      toast({
+        title: "Error",
+        description: "No se pudo marcar el paquete como pendiente.",
+        variant: "destructive"
+      });
+    }
+  };
+
   const contextValue: PackageContextType = {
     packages: enrichedPackages,
     addPackage,
@@ -184,6 +216,7 @@ export const PackageProvider: React.FC<{ children: React.ReactNode }> = ({ child
     getPackage,
     getNeighborPackages,
     markAsDelivered,
+    markAsPending,
     loading,
   };
 
