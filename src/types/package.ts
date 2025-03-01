@@ -17,3 +17,14 @@ export interface Package {
 }
 
 export type PackageFormData = Omit<Package, 'id' | 'neighbor' | 'created_at'>;
+
+// Type for data coming directly from Supabase before it's processed
+export interface RawPackageData {
+  id: string;
+  type: string;
+  received_date: string;
+  delivered_date: string | null;
+  company: string;
+  neighbor_id: string;
+  created_at: string;
+}

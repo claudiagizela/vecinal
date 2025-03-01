@@ -69,14 +69,14 @@ export const NeighborProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         throw error;
       }
       
-      setNeighbors((prev) => [...prev, newNeighbor]);
+      setNeighbors((prev) => [...prev, newNeighbor as Neighbor]);
       
       toast({
         title: "Vecino agregado",
         description: `${data.name} ${data.last_name} ha sido agregado correctamente.`,
       });
       
-      return newNeighbor;
+      // Return void to match the interface
     } catch (error) {
       console.error('Error adding neighbor:', error);
       toast({

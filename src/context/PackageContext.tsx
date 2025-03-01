@@ -1,6 +1,6 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { Package, PackageFormData } from '@/types/package';
+import { Package, PackageFormData, PackageType, Company, RawPackageData } from '@/types/package';
 import { toast } from '@/components/ui/use-toast';
 import { useNeighbors } from './NeighborContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -52,7 +52,7 @@ export const PackageProvider: React.FC<{ children: React.ReactNode }> = ({ child
       
       // Fetch images for each package
       const packagesWithImages = await Promise.all(
-        (packagesData || []).map(async (pkg) => {
+        (packagesData || []).map(async (pkg: RawPackageData) => {
           const { data: imagesData, error: imagesError } = await supabase
             .from('package_images')
             .select('image_url')
@@ -60,13 +60,20 @@ export const PackageProvider: React.FC<{ children: React.ReactNode }> = ({ child
           
           if (imagesError) {
             console.error('Error fetching images for package:', imagesError);
-            return { ...pkg, images: [] };
+            return { 
+              ...pkg, 
+              type: pkg.type as PackageType,
+              company: pkg.company as Company,
+              images: [] 
+            } as Package;
           }
           
           return { 
             ...pkg, 
+            type: pkg.type as PackageType,
+            company: pkg.company as Company,
             images: imagesData ? imagesData.map(img => img.image_url) : [] 
-          };
+          } as Package;
         })
       );
       
@@ -128,8 +135,10 @@ export const PackageProvider: React.FC<{ children: React.ReactNode }> = ({ child
       }
       
       // Add to local state
-      const packageWithImages = {
+      const packageWithImages: Package = {
         ...newPackage,
+        type: newPackage.type as PackageType,
+        company: newPackage.company as Company,
         images: data.images || []
       };
       
