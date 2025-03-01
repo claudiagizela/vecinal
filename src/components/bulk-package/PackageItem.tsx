@@ -1,10 +1,11 @@
 
 import React from 'react';
-import { RefreshCw, Edit } from 'lucide-react';
+import { RefreshCw, Edit, AlertCircle, FileQuestion, UserX } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Neighbor } from '@/types/neighbor';
 import { PackageFormData } from '@/types/package';
+import { ProcessingErrorType } from '@/hooks/useBulkPackageProcessor';
 
 interface ProcessedImage {
   id: number;
@@ -12,6 +13,7 @@ interface ProcessedImage {
   status: 'processing' | 'success' | 'error';
   packageData?: PackageFormData;
   errorMessage?: string;
+  errorType?: ProcessingErrorType;
   confidenceScore?: number;
 }
 
@@ -51,6 +53,30 @@ const PackageItem: React.FC<PackageItemProps> = ({
       );
     }
   };
+  
+  const getErrorIcon = (errorType?: ProcessingErrorType) => {
+    switch (errorType) {
+      case 'neighbor_not_found':
+        return <UserX size={16} className="mr-1 text-red-500" />;
+      case 'unclear_image':
+        return <FileQuestion size={16} className="mr-1 text-amber-500" />;
+      case 'generic_error':
+      default:
+        return <AlertCircle size={16} className="mr-1 text-red-500" />;
+    }
+  };
+
+  const getErrorBadgeClass = (errorType?: ProcessingErrorType) => {
+    switch (errorType) {
+      case 'neighbor_not_found':
+        return "bg-red-50 text-red-700 border-red-200";
+      case 'unclear_image':
+        return "bg-amber-50 text-amber-700 border-amber-200";
+      case 'generic_error':
+      default:
+        return "bg-destructive/10 text-destructive border-destructive/20";
+    }
+  };
 
   return (
     <div className="border rounded-lg overflow-hidden">
@@ -86,7 +112,8 @@ const PackageItem: React.FC<PackageItemProps> = ({
                 </>
               )}
               {item.status === 'error' && (
-                <div className="text-destructive text-sm font-medium mb-1">
+                <div className="text-destructive text-sm font-medium mb-1 flex items-center">
+                  {getErrorIcon(item.errorType)}
                   {item.errorMessage || 'Error al procesar'}
                 </div>
               )}
@@ -110,7 +137,7 @@ const PackageItem: React.FC<PackageItemProps> = ({
             
             {item.status === 'error' && (
               <div className="flex flex-col gap-1">
-                <Badge variant="outline" className="bg-destructive/10 text-destructive border-destructive/20">
+                <Badge variant="outline" className={getErrorBadgeClass(item.errorType)}>
                   Error
                 </Badge>
                 <div className="flex gap-1 mt-1">

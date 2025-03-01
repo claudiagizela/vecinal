@@ -1,9 +1,13 @@
-
 import { useState } from 'react';
 import { usePackages } from '@/context/PackageContext';
 import { useNeighbors } from '@/context/NeighborContext';
 import { toast } from '@/components/ui/use-toast';
 import { PackageFormData } from '@/types/package';
+
+export type ProcessingErrorType = 
+  | 'neighbor_not_found' 
+  | 'unclear_image' 
+  | 'generic_error';
 
 interface ProcessedImage {
   id: number;
@@ -11,6 +15,7 @@ interface ProcessedImage {
   status: 'processing' | 'success' | 'error';
   packageData?: PackageFormData;
   errorMessage?: string;
+  errorType?: ProcessingErrorType;
   confidenceScore?: number;
 }
 
@@ -57,17 +62,50 @@ export function useBulkPackageProcessor() {
 
   const processLabelImages = async (images: ProcessedImage[]) => {
     const processedResults = await Promise.all(images.map(async (img) => {
-      // Simulate API call to label recognition service
       await new Promise(resolve => setTimeout(resolve, 1500 + Math.random() * 1000));
       const now = new Date();
       const confidenceScore = Math.round((0.3 + Math.random() * 0.7) * 100);
-      const randomNeighbor = neighbors[Math.floor(Math.random() * neighbors.length)];
       
-      if (!randomNeighbor || Math.random() < 0.2) {
+      const randomError = Math.random();
+      
+      if (randomError < 0.06) {
         return {
           ...img,
           status: 'error' as const,
-          errorMessage: 'No se pudo reconocer la información del paquete',
+          errorMessage: 'No se encuentra ese vecino en la base de datos',
+          errorType: 'neighbor_not_found' as ProcessingErrorType,
+          confidenceScore: Math.round(Math.random() * 40)
+        };
+      }
+      
+      if (randomError < 0.16) {
+        return {
+          ...img,
+          status: 'error' as const,
+          errorMessage: 'La imagen no es suficientemente clara para obtener información',
+          errorType: 'unclear_image' as ProcessingErrorType,
+          confidenceScore: Math.round(Math.random() * 30)
+        };
+      }
+      
+      if (randomError < 0.2) {
+        return {
+          ...img,
+          status: 'error' as const,
+          errorMessage: 'Ocurrió un error',
+          errorType: 'generic_error' as ProcessingErrorType,
+          confidenceScore: Math.round(Math.random() * 20)
+        };
+      }
+      
+      const randomNeighbor = neighbors[Math.floor(Math.random() * neighbors.length)];
+      
+      if (!randomNeighbor) {
+        return {
+          ...img,
+          status: 'error' as const,
+          errorMessage: 'No se encuentra ese vecino en la base de datos',
+          errorType: 'neighbor_not_found' as ProcessingErrorType,
           confidenceScore: Math.round(Math.random() * 40)
         };
       }
@@ -101,10 +139,42 @@ export function useBulkPackageProcessor() {
     setIsProcessing(false);
     
     const successCount = processedResults.filter(item => item.status === 'success').length;
-    if (successCount > 0) {
+    const errorCount = processedResults.filter(item => item.status === 'error').length;
+    
+    if (successCount > 0 || errorCount > 0) {
+      let description = '';
+      
+      if (successCount > 0) {
+        description = `${successCount} de ${processedResults.length} paquetes fueron procesados correctamente.`;
+      }
+      
+      if (errorCount > 0) {
+        const errorsByType = processedResults.filter(i => i.status === 'error').reduce((acc, curr) => {
+          const errorType = curr.errorType || 'generic_error';
+          acc[errorType] = (acc[errorType] || 0) + 1;
+          return acc;
+        }, {} as Record<ProcessingErrorType, number>);
+        
+        if (description) description += ' ';
+        description += `${errorCount} con errores: `;
+        
+        const errorDetails = [];
+        if (errorsByType.neighbor_not_found) {
+          errorDetails.push(`${errorsByType.neighbor_not_found} vecinos no encontrados`);
+        }
+        if (errorsByType.unclear_image) {
+          errorDetails.push(`${errorsByType.unclear_image} imágenes poco claras`);
+        }
+        if (errorsByType.generic_error) {
+          errorDetails.push(`${errorsByType.generic_error} errores generales`);
+        }
+        
+        description += errorDetails.join(', ');
+      }
+      
       toast({
         title: "Procesamiento completado",
-        description: `${successCount} de ${processedResults.length} paquetes fueron procesados correctamente.`,
+        description
       });
     }
   };
