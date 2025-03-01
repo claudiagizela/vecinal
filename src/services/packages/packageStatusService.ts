@@ -54,3 +54,31 @@ export const markPackageAsPending = async (id: string): Promise<void> => {
     throw error;
   }
 };
+
+/**
+ * Resends a delivery notification email for a package that has already been delivered
+ */
+export const resendDeliveryNotification = async (id: string): Promise<void> => {
+  // Get package details
+  const { data: packageData, error: packageError } = await supabase
+    .from('packages')
+    .select('*')
+    .eq('id', id)
+    .single();
+  
+  if (packageError) {
+    console.error('Error fetching package data for email:', packageError);
+    throw packageError;
+  }
+  
+  if (!packageData) {
+    throw new Error('Package not found');
+  }
+  
+  if (!packageData.delivered_date) {
+    throw new Error('Package has not been delivered yet');
+  }
+  
+  // Resend notification email
+  await sendPackageNotification(packageData, packageData.delivered_date, 'delivered');
+};

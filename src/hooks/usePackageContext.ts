@@ -11,6 +11,7 @@ export interface PackageContextType {
   getNeighborPackages: (neighborId: string) => Package[];
   markAsDelivered: (id: string) => Promise<void>;
   markAsPending: (id: string) => Promise<void>;
+  resendNotification: (id: string) => Promise<void>;
   loading: boolean;
 }
 

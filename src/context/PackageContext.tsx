@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Package, PackageFormData } from '@/types/package';
 import { toast } from '@/components/ui/use-toast';
@@ -10,7 +9,8 @@ import {
   updatePackageData,
   deletePackageData,
   markPackageAsDelivered,
-  markPackageAsPending
+  markPackageAsPending,
+  resendDeliveryNotification
 } from '@/services/packageService';
 
 export { usePackages } from '@/hooks/usePackageContext';
@@ -208,6 +208,30 @@ export const PackageProvider: React.FC<{ children: React.ReactNode }> = ({ child
     }
   };
 
+  const resendNotification = async (id: string) => {
+    try {
+      await resendDeliveryNotification(id);
+      
+      const pkg = packages.find(p => p.id === id);
+      if (pkg) {
+        const neighbor = neighbors.find(n => n.id === pkg.neighbor_id);
+        const neighborName = neighbor ? `${neighbor.name} ${neighbor.last_name}` : 'Vecino';
+        
+        toast({
+          title: "Notificación enviada",
+          description: `Se ha enviado un correo de confirmación a ${neighborName}.`,
+        });
+      }
+    } catch (error) {
+      console.error('Error sending delivery notification:', error);
+      toast({
+        title: "Error",
+        description: "No se pudo enviar la notificación de entrega.",
+        variant: "destructive"
+      });
+    }
+  };
+
   const contextValue: PackageContextType = {
     packages: enrichedPackages,
     addPackage,
@@ -217,6 +241,7 @@ export const PackageProvider: React.FC<{ children: React.ReactNode }> = ({ child
     getNeighborPackages,
     markAsDelivered,
     markAsPending,
+    resendNotification,
     loading,
   };
 

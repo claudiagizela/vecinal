@@ -15,7 +15,17 @@ import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 
 const Packages = () => {
-  const { packages, addPackage, updatePackage, deletePackage, getPackage, markAsDelivered, markAsPending, loading } = usePackages();
+  const { 
+    packages, 
+    addPackage, 
+    updatePackage, 
+    deletePackage, 
+    getPackage, 
+    markAsDelivered, 
+    markAsPending, 
+    resendNotification, 
+    loading 
+  } = usePackages();
   const [formOpen, setFormOpen] = useState(false);
   const [currentPackageId, setCurrentPackageId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'pending' | 'delivered'>('pending');
@@ -146,6 +156,7 @@ const Packages = () => {
               onDelete={deletePackage}
               onMarkDelivered={markAsDelivered}
               onMarkPending={markAsPending}
+              onResendNotification={resendNotification}
             />
           </div>
         </main>

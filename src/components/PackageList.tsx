@@ -14,7 +14,8 @@ import {
   Check,
   Calendar,
   Building2,
-  RefreshCw
+  RefreshCw,
+  Mail
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
@@ -36,6 +37,7 @@ interface PackageListProps {
   onDelete: (id: string) => void;
   onMarkDelivered: (id: string) => void;
   onMarkPending?: (id: string) => void;
+  onResendNotification?: (id: string) => void;
   className?: string;
 }
 
@@ -45,6 +47,7 @@ const PackageList: React.FC<PackageListProps> = ({
   onDelete,
   onMarkDelivered,
   onMarkPending,
+  onResendNotification,
   className,
 }) => {
   const [search, setSearch] = useState('');
@@ -162,16 +165,29 @@ const PackageList: React.FC<PackageListProps> = ({
                       
                       <div className="flex justify-end gap-2 mt-3">
                         {pkg.delivered_date ? (
-                          onMarkPending && (
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => onMarkPending(pkg.id)}
-                              className="h-8 text-amber-600 border-amber-200 hover:bg-amber-50 hover:text-amber-700"
-                            >
-                              <RefreshCw size={14} className="mr-1" /> Marcar como pendiente
-                            </Button>
-                          )
+                          <>
+                            {onResendNotification && (
+                              <Button
+                                size="icon"
+                                variant="outline"
+                                onClick={() => onResendNotification(pkg.id)}
+                                className="h-8 w-8 text-blue-600 border-blue-200 hover:bg-blue-50 hover:text-blue-700"
+                                title="Reenviar notificación de entrega"
+                              >
+                                <Mail size={16} />
+                              </Button>
+                            )}
+                            {onMarkPending && (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => onMarkPending(pkg.id)}
+                                className="h-8 text-amber-600 border-amber-200 hover:bg-amber-50 hover:text-amber-700"
+                              >
+                                <RefreshCw size={14} className="mr-1" /> Marcar como pendiente
+                              </Button>
+                            )}
+                          </>
                         ) : (
                           <Button
                             size="sm"
