@@ -105,13 +105,6 @@ const Packages = () => {
                 </div>
               </div>
               <div className="flex space-x-2">
-                <Link 
-                  to="/bulk-packages"
-                  className="inline-flex items-center justify-center rounded-md text-sm font-medium gap-2 ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
-                >
-                  <ImageIcon size={16} />
-                  Registro por Foto
-                </Link>
                 <Button 
                   onClick={handleOpenForm}
                   variant="outline"
@@ -120,6 +113,13 @@ const Packages = () => {
                   <PackagePlus size={16} />
                   Registrar Paquete
                 </Button>
+                <Link 
+                  to="/bulk-packages"
+                  className="inline-flex items-center justify-center rounded-md text-sm font-medium gap-2 ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
+                >
+                  <ImageIcon size={16} />
+                  Registro por Foto
+                </Link>
               </div>
             </div>
           </div>
