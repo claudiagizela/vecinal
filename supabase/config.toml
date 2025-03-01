@@ -30,4 +30,5 @@ enabled = true
 site_url = "http://localhost:3000"
 
 [functions]
+[functions.serve]
 enabled = true
