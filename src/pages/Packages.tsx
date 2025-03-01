@@ -107,18 +107,19 @@ const Packages = () => {
               <div className="flex space-x-2">
                 <Link 
                   to="/bulk-packages"
-                  className="inline-flex items-center justify-center rounded-md text-sm font-medium gap-2 ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2"
+                  className="inline-flex items-center justify-center rounded-md text-sm font-medium gap-2 ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
                 >
                   <ImageIcon size={16} />
                   Registro por Foto
                 </Link>
-                <button 
+                <Button 
                   onClick={handleOpenForm}
-                  className="inline-flex items-center justify-center rounded-md text-sm font-medium gap-2 ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
+                  variant="outline"
+                  className="gap-2"
                 >
                   <PackagePlus size={16} />
                   Registrar Paquete
-                </button>
+                </Button>
               </div>
             </div>
           </div>
