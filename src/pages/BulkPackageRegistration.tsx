@@ -214,7 +214,7 @@ const BulkPackageRegistration = () => {
   return (
     <div className="min-h-screen bg-background">
       <div className="sticky top-0 z-10 backdrop-blur-md bg-background/80 border-b py-4 px-6 mb-6">
-        <div className="max-w-7xl mx-auto">
+        <div className="max-w-4xl mx-auto">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
               <div className="rounded-full bg-primary/10 p-2 text-primary">
@@ -241,173 +241,167 @@ const BulkPackageRegistration = () => {
         </div>
       </div>
       
-      <main className="max-w-7xl mx-auto px-6 pb-16 animate-fade-in">
-        <div className="flex flex-col md:flex-row gap-6">
-          <div className="w-full md:w-1/2">
-            <Card className="mb-6">
-              <CardContent className="pt-6">
-                <div className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-border rounded-lg">
-                  <Upload className="h-12 w-12 text-muted-foreground mb-3" />
-                  <h3 className="text-lg font-medium mb-1">Subir fotografías de etiquetas</h3>
-                  <p className="text-sm text-muted-foreground text-center mb-4">
-                    Sube fotografías de las etiquetas de los paquetes para procesarlas automáticamente
-                  </p>
-                  <input 
-                    type="file" 
-                    id="bulk-images" 
-                    className="hidden" 
-                    multiple 
-                    accept="image/*"
-                    onChange={handleImageUpload}
-                    disabled={isProcessing}
-                  />
-                  <Button 
-                    onClick={() => document.getElementById('bulk-images')?.click()}
-                    disabled={isProcessing}
-                    className="gap-2"
-                  >
-                    <Upload size={16} />
-                    Seleccionar Imágenes
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+      <main className="max-w-4xl mx-auto px-6 pb-16 animate-fade-in space-y-6">
+        <Card className="w-full">
+          <CardContent className="pt-6">
+            <div className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-border rounded-lg">
+              <Upload className="h-12 w-12 text-muted-foreground mb-3" />
+              <h3 className="text-lg font-medium mb-1">Subir fotografías de etiquetas</h3>
+              <p className="text-sm text-muted-foreground text-center mb-4">
+                Sube fotografías de las etiquetas de los paquetes para procesarlas automáticamente
+              </p>
+              <input 
+                type="file" 
+                id="bulk-images" 
+                className="hidden" 
+                multiple 
+                accept="image/*"
+                onChange={handleImageUpload}
+                disabled={isProcessing}
+              />
+              <Button 
+                onClick={() => document.getElementById('bulk-images')?.click()}
+                disabled={isProcessing}
+                className="gap-2"
+              >
+                <Upload size={16} />
+                Seleccionar Imágenes
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
             
-            {uploadedCount > 0 && (
-              <Alert className="mb-6 bg-green-50 text-green-700 border-green-200">
-                <CheckCircle2 className="h-4 w-4" />
-                <AlertTitle>Paquetes registrados</AlertTitle>
-                <AlertDescription>
-                  Has registrado exitosamente {uploadedCount} paquetes en esta sesión.
-                </AlertDescription>
-              </Alert>
-            )}
-          </div>
-          
-          <div className="w-full md:w-1/2">
-            <Card>
-              <CardContent className="pt-6">
-                <div className="flex justify-between items-center mb-4">
-                  <h3 className="text-lg font-medium">Paquetes procesados</h3>
-                  <div className="flex gap-2">
-                    {processedImages.filter(i => i.status === 'error').length > 0 && (
-                      <Button variant="outline" size="sm" onClick={retryFailedItems} disabled={isProcessing}>
-                        Reintentar fallidos
-                      </Button>
-                    )}
-                    {processedImages.length > 0 && (
-                      <Button variant="outline" size="sm" onClick={clearAll} disabled={isProcessing}>
-                        Limpiar
-                      </Button>
-                    )}
-                  </div>
-                </div>
-                
-                {processedImages.length > 0 ? (
-                  <div className="space-y-4">
-                    {processedImages.map((item) => (
-                      <div key={item.id} className="border rounded-lg overflow-hidden">
-                        <div className="grid grid-cols-3 gap-4">
-                          <div className="col-span-1 h-24 relative">
-                            <img 
-                              src={item.image} 
-                              alt="Package label" 
-                              className="w-full h-full object-cover"
-                            />
-                          </div>
-                          <div className="col-span-2 p-3">
-                            <div className="flex justify-between items-start">
-                              <div>
-                                {item.status === 'processing' && (
-                                  <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
-                                    Procesando...
-                                  </Badge>
-                                )}
-                                {item.status === 'success' && item.packageData && (
-                                  <>
-                                    <div className="font-medium">
-                                      {neighbors.find(n => n.id === item.packageData?.neighbor_id)?.name}{' '}
-                                      {neighbors.find(n => n.id === item.packageData?.neighbor_id)?.last_name}{' '}
-                                      {neighbors.find(n => n.id === item.packageData?.neighbor_id)?.second_last_name}
-                                    </div>
-                                    <div className="text-xs text-muted-foreground">
-                                      Apto {neighbors.find(n => n.id === item.packageData?.neighbor_id)?.apartment} | {item.packageData.company}
-                                    </div>
-                                    <div className="mt-1">
-                                      {getConfidenceBadge(item.confidenceScore)}
-                                    </div>
-                                  </>
-                                )}
-                                {item.status === 'error' && (
-                                  <div className="text-destructive text-sm font-medium mb-1">
-                                    {item.errorMessage || 'Error al procesar'}
-                                  </div>
-                                )}
+        {uploadedCount > 0 && (
+          <Alert className="bg-green-50 text-green-700 border-green-200">
+            <CheckCircle2 className="h-4 w-4" />
+            <AlertTitle>Paquetes registrados</AlertTitle>
+            <AlertDescription>
+              Has registrado exitosamente {uploadedCount} paquetes en esta sesión.
+            </AlertDescription>
+          </Alert>
+        )}
+        
+        <Card className="w-full">
+          <CardContent className="pt-6">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-medium">Paquetes procesados</h3>
+              <div className="flex gap-2">
+                {processedImages.filter(i => i.status === 'error').length > 0 && (
+                  <Button variant="outline" size="sm" onClick={retryFailedItems} disabled={isProcessing}>
+                    Reintentar fallidos
+                  </Button>
+                )}
+                {processedImages.length > 0 && (
+                  <Button variant="outline" size="sm" onClick={clearAll} disabled={isProcessing}>
+                    Limpiar
+                  </Button>
+                )}
+              </div>
+            </div>
+            
+            {processedImages.length > 0 ? (
+              <div className="space-y-4">
+                {processedImages.map((item) => (
+                  <div key={item.id} className="border rounded-lg overflow-hidden">
+                    <div className="grid grid-cols-3 gap-4">
+                      <div className="col-span-1 h-24 relative">
+                        <img 
+                          src={item.image} 
+                          alt="Package label" 
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <div className="col-span-2 p-3">
+                        <div className="flex justify-between items-start">
+                          <div>
+                            {item.status === 'processing' && (
+                              <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+                                Procesando...
+                              </Badge>
+                            )}
+                            {item.status === 'success' && item.packageData && (
+                              <>
+                                <div className="font-medium">
+                                  {neighbors.find(n => n.id === item.packageData?.neighbor_id)?.name}{' '}
+                                  {neighbors.find(n => n.id === item.packageData?.neighbor_id)?.last_name}{' '}
+                                  {neighbors.find(n => n.id === item.packageData?.neighbor_id)?.second_last_name}
+                                </div>
+                                <div className="text-xs text-muted-foreground">
+                                  Apto {neighbors.find(n => n.id === item.packageData?.neighbor_id)?.apartment} | {item.packageData.company}
+                                </div>
+                                <div className="mt-1">
+                                  {getConfidenceBadge(item.confidenceScore)}
+                                </div>
+                              </>
+                            )}
+                            {item.status === 'error' && (
+                              <div className="text-destructive text-sm font-medium mb-1">
+                                {item.errorMessage || 'Error al procesar'}
                               </div>
-                              
-                              {item.status === 'success' && (
-                                <div className="flex flex-col gap-1">
-                                  <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
-                                    Listo para registrar
-                                  </Badge>
-                                  <div className="flex gap-1 mt-1">
-                                    <Button variant="outline" size="sm" className="h-6 px-2" onClick={() => handleRetryItem(item.id)}>
-                                      <RefreshCw size={12} className="mr-1" /> Reintentar
-                                    </Button>
-                                    <Button variant="outline" size="sm" className="h-6 px-2" onClick={() => openManualForm(item.id)}>
-                                      <Edit size={12} className="mr-1" /> Editar
-                                    </Button>
-                                  </div>
-                                </div>
-                              )}
-                              
-                              {item.status === 'error' && (
-                                <div className="flex flex-col gap-1">
-                                  <Badge variant="outline" className="bg-destructive/10 text-destructive border-destructive/20">
-                                    Error
-                                  </Badge>
-                                  <div className="flex gap-1 mt-1">
-                                    <Button variant="outline" size="sm" className="h-6 px-2" onClick={() => handleRetryItem(item.id)}>
-                                      <RefreshCw size={12} className="mr-1" /> Reintentar
-                                    </Button>
-                                    <Button variant="outline" size="sm" className="h-6 px-2" onClick={() => openManualForm(item.id)}>
-                                      <Edit size={12} className="mr-1" /> Manual
-                                    </Button>
-                                  </div>
-                                </div>
-                              )}
-                            </div>
+                            )}
                           </div>
+                          
+                          {item.status === 'success' && (
+                            <div className="flex flex-col gap-1">
+                              <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                                Listo para registrar
+                              </Badge>
+                              <div className="flex gap-1 mt-1">
+                                <Button variant="outline" size="sm" className="h-6 px-2" onClick={() => handleRetryItem(item.id)}>
+                                  <RefreshCw size={12} className="mr-1" /> Reintentar
+                                </Button>
+                                <Button variant="outline" size="sm" className="h-6 px-2" onClick={() => openManualForm(item.id)}>
+                                  <Edit size={12} className="mr-1" /> Editar
+                                </Button>
+                              </div>
+                            </div>
+                          )}
+                          
+                          {item.status === 'error' && (
+                            <div className="flex flex-col gap-1">
+                              <Badge variant="outline" className="bg-destructive/10 text-destructive border-destructive/20">
+                                Error
+                              </Badge>
+                              <div className="flex gap-1 mt-1">
+                                <Button variant="outline" size="sm" className="h-6 px-2" onClick={() => handleRetryItem(item.id)}>
+                                  <RefreshCw size={12} className="mr-1" /> Reintentar
+                                </Button>
+                                <Button variant="outline" size="sm" className="h-6 px-2" onClick={() => openManualForm(item.id)}>
+                                  <Edit size={12} className="mr-1" /> Manual
+                                </Button>
+                              </div>
+                            </div>
+                          )}
                         </div>
                       </div>
-                    ))}
-                    
-                    <Separator className="my-4" />
-                    
-                    <div className="flex justify-end">
-                      <Button 
-                        onClick={registerPackages}
-                        disabled={isProcessing || !processedImages.some(i => i.status === 'success')}
-                        className="gap-2"
-                      >
-                        <CheckCircle2 size={16} />
-                        Registrar {processedImages.filter(i => i.status === 'success').length} Paquetes
-                      </Button>
                     </div>
                   </div>
-                ) : (
-                  <div className="flex flex-col items-center justify-center py-12 text-center">
-                    <AlertCircle className="h-12 w-12 text-muted-foreground mb-3" />
-                    <h3 className="text-lg font-medium mb-1">No hay paquetes procesados</h3>
-                    <p className="text-sm text-muted-foreground max-w-md">
-                      Sube fotografías de las etiquetas de los paquetes para comenzar a procesarlos y registrarlos automáticamente
-                    </p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </div>
-        </div>
+                ))}
+                
+                <Separator className="my-4" />
+                
+                <div className="flex justify-end">
+                  <Button 
+                    onClick={registerPackages}
+                    disabled={isProcessing || !processedImages.some(i => i.status === 'success')}
+                    className="gap-2"
+                  >
+                    <CheckCircle2 size={16} />
+                    Registrar {processedImages.filter(i => i.status === 'success').length} Paquetes
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center py-12 text-center">
+                <AlertCircle className="h-12 w-12 text-muted-foreground mb-3" />
+                <h3 className="text-lg font-medium mb-1">No hay paquetes procesados</h3>
+                <p className="text-sm text-muted-foreground max-w-md">
+                  Sube fotografías de las etiquetas de los paquetes para comenzar a procesarlos y registrarlos automáticamente
+                </p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
       </main>
 
       <Dialog open={showManualForm} onOpenChange={setShowManualForm}>
