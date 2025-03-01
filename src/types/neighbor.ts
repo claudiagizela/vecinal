@@ -6,6 +6,7 @@ export interface Neighbor {
   second_last_name: string;
   apartment: string;
   mobile_number: string;
+  email?: string;
   packages?: Package[];
 }
 

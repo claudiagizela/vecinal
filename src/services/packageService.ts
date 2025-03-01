@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { Package, PackageFormData, PackageType, Company, RawPackageData } from '@/types/package';
 
@@ -77,6 +76,58 @@ export const createPackage = async (data: PackageFormData): Promise<string | und
     }
   }
   
+  // Send notification email if the package was created successfully
+  if (newPackage && newPackage.id) {
+    try {
+      // Get neighbor details for the email
+      const { data: neighborData, error: neighborError } = await supabase
+        .from('neighbors')
+        .select('name, last_name, mobile_number, email')
+        .eq('id', data.neighbor_id)
+        .single();
+      
+      if (neighborError) {
+        console.error('Error fetching neighbor data for email:', neighborError);
+      } else if (neighborData) {
+        // Use email if available, or mobile_number as fallback
+        const email = neighborData.email || `${neighborData.mobile_number}@example.com`;
+        
+        const response = await fetch(
+          `https://mhrbnafcdadsqkrsfwdr.supabase.co/functions/v1/send-package-notification`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1ocmJuYWZjZGFkc3FrcnNmd2RyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDA4NTc5MzEsImV4cCI6MjA1NjQzMzkzMX0.2W4LMuDUWS4TLyZ7hClUn-Ukvs00hSn_Qyug9FTE3N8`,
+            },
+            body: JSON.stringify({
+              neighbor: {
+                name: neighborData.name,
+                last_name: neighborData.last_name,
+                email: email,
+              },
+              package: {
+                id: newPackage.id,
+                type: data.type,
+                company: data.company,
+                received_date: data.received_date,
+                delivered_date: null,
+              },
+              notificationType: 'received',
+            }),
+          }
+        );
+        
+        if (!response.ok) {
+          console.error('Error sending notification email:', await response.json());
+        }
+      }
+    } catch (error) {
+      console.error('Error sending notification email:', error);
+      // Don't throw here, just log the error since the package was created successfully
+    }
+  }
+  
   return newPackage.id;
 };
 
@@ -147,6 +198,67 @@ export const markPackageAsDelivered = async (id: string): Promise<string> => {
   
   if (error) {
     throw error;
+  }
+  
+  // Send notification email
+  try {
+    // Get package details
+    const { data: packageData, error: packageError } = await supabase
+      .from('packages')
+      .select('*')
+      .eq('id', id)
+      .single();
+    
+    if (packageError) {
+      console.error('Error fetching package data for email:', packageError);
+    } else if (packageData) {
+      // Get neighbor details
+      const { data: neighborData, error: neighborError } = await supabase
+        .from('neighbors')
+        .select('name, last_name, mobile_number, email')
+        .eq('id', packageData.neighbor_id)
+        .single();
+      
+      if (neighborError) {
+        console.error('Error fetching neighbor data for email:', neighborError);
+      } else if (neighborData) {
+        // Use email if available, or mobile_number as fallback
+        const email = neighborData.email || `${neighborData.mobile_number}@example.com`;
+        
+        const response = await fetch(
+          `https://mhrbnafcdadsqkrsfwdr.supabase.co/functions/v1/send-package-notification`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1ocmJuYWZjZGFkc3FrcnNmd2RyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDA4NTc5MzEsImV4cCI6MjA1NjQzMzkzMX0.2W4LMuDUWS4TLyZ7hClUn-Ukvs00hSn_Qyug9FTE3N8`,
+            },
+            body: JSON.stringify({
+              neighbor: {
+                name: neighborData.name,
+                last_name: neighborData.last_name,
+                email: email,
+              },
+              package: {
+                id: packageData.id,
+                type: packageData.type,
+                company: packageData.company,
+                received_date: packageData.received_date,
+                delivered_date: delivered_date,
+              },
+              notificationType: 'delivered',
+            }),
+          }
+        );
+        
+        if (!response.ok) {
+          console.error('Error sending delivery notification email:', await response.json());
+        }
+      }
+    }
+  } catch (error) {
+    console.error('Error sending delivery notification email:', error);
+    // Don't throw here since the package was marked as delivered successfully
   }
   
   return delivered_date;
