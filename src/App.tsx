@@ -3,7 +3,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { NeighborProvider } from "@/context/NeighborContext";
 import { PackageProvider } from "@/context/PackageContext";
 import { AuthProvider } from "@/context/AuthContext";
@@ -31,7 +31,7 @@ const App = () => (
                   path="/" 
                   element={
                     <ProtectedRoute>
-                      <Index />
+                      <Navigate to="/packages" replace />
                     </ProtectedRoute>
                   } 
                 />
@@ -40,6 +40,14 @@ const App = () => (
                   element={
                     <ProtectedRoute>
                       <Packages />
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route 
+                  path="/vecinos" 
+                  element={
+                    <ProtectedRoute>
+                      <Index />
                     </ProtectedRoute>
                   } 
                 />

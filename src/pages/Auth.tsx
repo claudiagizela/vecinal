@@ -14,7 +14,7 @@ const Auth = () => {
   const [activeTab, setActiveTab] = useState<'login' | 'signup'>('login');
 
   if (user || devModeEnabled) {
-    return <Navigate to="/" replace />;
+    return <Navigate to="/packages" replace />;
   }
 
   return (
