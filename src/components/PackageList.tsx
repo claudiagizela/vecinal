@@ -48,7 +48,7 @@ const PackageList: React.FC<PackageListProps> = ({
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
   const filteredPackages = packages.filter((pkg) =>
-    `${pkg.neighbor?.name || ''} ${pkg.neighbor?.last_name || ''} ${pkg.neighbor?.apartment || ''} ${pkg.company} ${pkg.type}`
+    `${pkg.neighbor?.name || ''} ${pkg.neighbor?.last_name || ''} ${pkg.neighbor?.second_last_name || ''} ${pkg.neighbor?.apartment || ''} ${pkg.company} ${pkg.type}`
       .toLowerCase()
       .includes(search.toLowerCase())
   );
@@ -116,7 +116,7 @@ const PackageList: React.FC<PackageListProps> = ({
                           </div>
                           <div>
                             <h3 className="font-medium">
-                              {pkg.neighbor?.name} {pkg.neighbor?.last_name}
+                              {pkg.neighbor?.name} {pkg.neighbor?.last_name} {pkg.neighbor?.second_last_name}
                             </h3>
                             <span className="text-xs text-muted-foreground">
                               Apto {pkg.neighbor?.apartment}
