@@ -6,11 +6,16 @@ import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
 import { Menu, Users, Package, UserCircle2, LogOut } from 'lucide-react';
 import { useAuth } from '@/context/auth';
+import { useNeighbors } from '@/context/NeighborContext';
 
 const Sidebar = () => {
   const [collapsed, setCollapsed] = useState(false);
   const location = useLocation();
   const { signOut, user } = useAuth();
+  const { getCurrentUserNeighbor } = useNeighbors();
+
+  // Get the current user's neighbor profile
+  const userNeighbor = getCurrentUserNeighbor();
 
   // Logging user data for debugging
   useEffect(() => {
@@ -18,13 +23,22 @@ const Sidebar = () => {
       console.log("User data in Sidebar:", user);
       console.log("User metadata:", user.user_metadata);
     }
-  }, [user]);
+    
+    if (userNeighbor) {
+      console.log("User neighbor profile:", userNeighbor);
+    }
+  }, [user, userNeighbor]);
 
-  // Get user's full name from metadata or fallback to username
-  const fullName = user?.user_metadata?.full_name || 
-                   user?.user_metadata?.username || 
-                   user?.email?.split('@')[0] || 
-                   'Usuario';
+  // Get user's display name:
+  // 1. Neighbor's name if available
+  // 2. Fall back to user's full_name from metadata
+  // 3. Fall back to username or email
+  const displayName = userNeighbor 
+    ? `${userNeighbor.name}` 
+    : (user?.user_metadata?.full_name || 
+       user?.user_metadata?.username || 
+       user?.email?.split('@')[0] || 
+       'Usuario');
   
   // Check if user is a vecino
   const isVecino = user?.user_metadata?.role === 'vecino';
@@ -70,7 +84,7 @@ const Sidebar = () => {
       {/* Sidebar Header */}
       <div className="p-4 flex items-center justify-between">
         {!collapsed && (
-          <h2 className="font-semibold text-lg overflow-hidden text-ellipsis">¡Hola {fullName}!</h2>
+          <h2 className="font-semibold text-lg overflow-hidden text-ellipsis">¡Hola {displayName}!</h2>
         )}
         <Button 
           variant="ghost" 
