@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { usePackages } from '@/context/PackageContext';
 import { useNeighbors } from '@/context/NeighborContext';
 import { toast } from '@/components/ui/use-toast';
-import { PackageFormData } from '@/types/package';
+import { PackageFormData, PackageType, Company } from '@/types/package';
 
 export type ProcessingErrorType = 
   | 'neighbor_not_found' 
@@ -112,6 +112,14 @@ export function useBulkPackageProcessor() {
         };
       }
       
+      const randomPackageType: PackageType = Math.random() > 0.5 ? 'caja' : 
+                                           Math.random() > 0.5 ? 'sobre' : 
+                                           Math.random() > 0.5 ? 'bolsa' : 'otro';
+      
+      const randomCompany: Company = Math.random() > 0.7 ? 'Amazon' : 
+                                    Math.random() > 0.5 ? 'Mercado Libre' : 
+                                    Math.random() > 0.5 ? 'DHL' : 'FedEx';
+      
       if (confidenceScore < confidenceThreshold) {
         return {
           ...img,
@@ -120,12 +128,10 @@ export function useBulkPackageProcessor() {
           errorType: 'low_confidence' as ProcessingErrorType,
           confidenceScore,
           packageData: {
-            type: Math.random() > 0.5 ? 'caja' : Math.random() > 0.5 ? 'sobre' : 'bolsa',
+            type: randomPackageType,
             received_date: now.toISOString(),
             delivered_date: null,
-            company: Math.random() > 0.7 ? 'Amazon' : 
-                     Math.random() > 0.5 ? 'Mercado Libre' : 
-                     Math.random() > 0.5 ? 'DHL' : 'FedEx',
+            company: randomCompany,
             neighbor_id: randomNeighbor.id,
             images: [img.image]
           }
@@ -133,12 +139,10 @@ export function useBulkPackageProcessor() {
       }
       
       const packageData: PackageFormData = {
-        type: Math.random() > 0.5 ? 'caja' : Math.random() > 0.5 ? 'sobre' : 'bolsa',
+        type: randomPackageType,
         received_date: now.toISOString(),
         delivered_date: null,
-        company: Math.random() > 0.7 ? 'Amazon' : 
-                 Math.random() > 0.5 ? 'Mercado Libre' : 
-                 Math.random() > 0.5 ? 'DHL' : 'FedEx',
+        company: randomCompany,
         neighbor_id: randomNeighbor.id,
         images: [img.image]
       };
