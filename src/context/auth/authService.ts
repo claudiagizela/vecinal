@@ -116,10 +116,15 @@ export const authService = {
     try {
       console.log("Enviando correo de recuperación a:", email);
       
-      // URL de redirección actualizada
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/reset`,
+      // URL de redirección actualizada usando window.location.origin para ser dinámica
+      const redirectUrl = `${window.location.origin}/reset`;
+      console.log("URL de redirección:", redirectUrl);
+      
+      const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: redirectUrl,
       });
+
+      console.log("Respuesta de supabase:", { data, error });
 
       if (error) {
         console.error("Error en resetPassword:", error);
@@ -132,7 +137,7 @@ export const authService = {
         description: "Se ha enviado un correo con instrucciones para restablecer tu contraseña.",
       });
       
-      return { success: true };
+      return { success: true, data };
     } catch (error: any) {
       console.error("Error detallado en resetPassword:", error);
       toast({

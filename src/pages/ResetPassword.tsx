@@ -33,10 +33,10 @@ const ResetPassword = () => {
   const onSubmit = async (data: ResetFormValues) => {
     try {
       console.log("Enviando solicitud de recuperación para:", data.email);
-      await resetPassword(data.email);
-      console.log("Solicitud de recuperación enviada correctamente");
+      const result = await resetPassword(data.email);
+      console.log("Resultado de resetPassword:", result);
       
-      // Mostrar toast explícitamente aquí además del que se muestra en authService
+      // Mostrar toast aquí, independientemente del que se muestra en authService
       toast({
         title: "Correo enviado",
         description: "Se ha enviado un enlace de restablecimiento a tu correo electrónico.",
