@@ -1,5 +1,6 @@
+
 import React from 'react';
-import { Users, Package, LogOut } from 'lucide-react';
+import { Users, Package } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useNeighbors } from '@/context/NeighborContext';
 import { useLocation } from 'react-router-dom';
@@ -14,7 +15,7 @@ const Header: React.FC<HeaderProps> = ({ onAddNew }) => {
   const location = useLocation();
   const isNeighbors = location.pathname === '/neighbors';
   const isPackages = location.pathname === '/packages';
-  const { user, signOut } = useAuth();
+  const { user } = useAuth();
   
   return (
     <header className="sticky top-0 z-10 backdrop-blur-md bg-background/80 border-b py-4 px-6 mb-6">
@@ -49,17 +50,6 @@ const Header: React.FC<HeaderProps> = ({ onAddNew }) => {
                 </>
               )}
             </Button>
-            
-            {user && (
-              <Button 
-                variant="outline" 
-                onClick={() => signOut()} 
-                className="ml-2 group"
-              >
-                <LogOut size={18} className="transition-transform group-hover:scale-110" />
-                <span className="sr-only md:not-sr-only md:ml-2">Cerrar Sesión</span>
-              </Button>
-            )}
           </div>
         </div>
       </div>
