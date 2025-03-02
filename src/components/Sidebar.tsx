@@ -25,27 +25,40 @@ const Sidebar = () => {
                    user?.user_metadata?.username || 
                    user?.email?.split('@')[0] || 
                    'Usuario';
+  
+  // Check if user is a vecino
+  const isVecino = user?.user_metadata?.role === 'vecino';
 
-  const navItems = [
-    {
-      title: 'Vecinos',
-      icon: Users,
-      path: '/neighbors',
-      active: location.pathname === '/neighbors',
-    },
-    {
-      title: 'Paquetes',
-      icon: Package,
-      path: '/packages',
-      active: location.pathname === '/packages',
-    },
-    {
-      title: 'Usuarios',
-      icon: UserCircle2,
-      path: '/users',
-      active: location.pathname === '/users',
-    },
-  ];
+  // Define navigation items based on user role
+  const navItems = isVecino 
+    ? [
+        {
+          title: 'Paquetes',
+          icon: Package,
+          path: '/packages',
+          active: location.pathname === '/packages',
+        }
+      ]
+    : [
+        {
+          title: 'Vecinos',
+          icon: Users,
+          path: '/neighbors',
+          active: location.pathname === '/neighbors',
+        },
+        {
+          title: 'Paquetes',
+          icon: Package,
+          path: '/packages',
+          active: location.pathname === '/packages',
+        },
+        {
+          title: 'Usuarios',
+          icon: UserCircle2,
+          path: '/users',
+          active: location.pathname === '/users',
+        }
+      ];
 
   return (
     <div 
