@@ -1,17 +1,19 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
 
 export const authService = {
-  signUp: async (email: string, password: string, userType: 'vecino' | 'guardia') => {
+  signUp: async (email: string, password: string, userType: 'vecino' | 'guardia', username: string) => {
     try {
-      console.log(`Intentando registrar usuario: ${email}, tipo: ${userType}`);
+      console.log(`Intentando registrar usuario: ${email}, tipo: ${userType}, username: ${username}`);
       
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
           data: {
-            role: userType
+            role: userType,
+            username: username
           },
           emailRedirectTo: window.location.origin + '/auth'
         }
