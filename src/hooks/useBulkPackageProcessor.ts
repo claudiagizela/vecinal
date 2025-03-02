@@ -21,6 +21,8 @@ interface ProcessedImage {
   confidenceScore?: number;
 }
 
+const imageConfidenceCache = new Map<string, number>();
+
 export function useBulkPackageProcessor() {
   const { addPackage } = usePackages();
   const { neighbors } = useNeighbors();
@@ -30,6 +32,22 @@ export function useBulkPackageProcessor() {
   const [manualItemId, setManualItemId] = useState<number | null>(null);
   const [showManualForm, setShowManualForm] = useState(false);
   const [confidenceThreshold, setConfidenceThreshold] = useState(80);
+
+  const getImageHash = (imageData: string): string => {
+    const startIndex = imageData.indexOf('base64,') + 7;
+    return imageData.substr(startIndex, 100);
+  };
+  
+  const getConsistentConfidenceScore = (imageData: string): number => {
+    const imageHash = getImageHash(imageData);
+    
+    if (!imageConfidenceCache.has(imageHash)) {
+      const confidenceScore = Math.round((0.4 + Math.random() * 0.6) * 100);
+      imageConfidenceCache.set(imageHash, confidenceScore);
+    }
+    
+    return imageConfidenceCache.get(imageHash) || 0;
+  };
 
   const getImageFromItemId = (id: number | null): string => {
     if (!id) return '';
@@ -86,7 +104,7 @@ export function useBulkPackageProcessor() {
     const processedResults = await Promise.all(images.map(async (img) => {
       await new Promise(resolve => setTimeout(resolve, 1500 + Math.random() * 1000));
       const now = new Date();
-      const confidenceScore = Math.round((0.4 + Math.random() * 0.6) * 100);
+      const confidenceScore = getConsistentConfidenceScore(img.image);
       
       const randomError = Math.random();
       
@@ -133,8 +151,8 @@ export function useBulkPackageProcessor() {
       }
       
       const randomPackageType: PackageType = Math.random() > 0.5 ? 'caja' : 
-                                           Math.random() > 0.5 ? 'sobre' : 
-                                           Math.random() > 0.5 ? 'bolsa' : 'otro';
+                                          Math.random() > 0.5 ? 'sobre' : 
+                                          Math.random() > 0.5 ? 'bolsa' : 'otro';
       
       const randomCompany: Company = Math.random() > 0.7 ? 'Amazon' : 
                                     Math.random() > 0.5 ? 'Mercado Libre' : 
