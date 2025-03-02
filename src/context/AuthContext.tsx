@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { User, Session } from '@supabase/supabase-js';
@@ -11,6 +12,7 @@ interface AuthContextType {
   signIn: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
+  updatePassword: (password: string) => Promise<void>;
   devModeEnabled: boolean;
   toggleDevMode: () => void;
 }
@@ -66,6 +68,40 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setUser(session?.user || null);
       setLoading(false);
     });
+
+    // Verificar si hay un token de recuperación en la URL (como hash)
+    const handleRecoveryToken = async () => {
+      const hash = window.location.hash;
+      if (hash && hash.includes('type=recovery')) {
+        // Limpiamos el hash de la URL para que no quede expuesto
+        window.location.hash = '';
+        
+        try {
+          setLoading(true);
+          const { data, error } = await supabase.auth.refreshSession();
+          
+          if (error) {
+            throw error;
+          }
+
+          toast({
+            title: "Sesión verificada",
+            description: "Ahora puedes establecer una nueva contraseña",
+          });
+        } catch (error: any) {
+          console.error("Error al procesar token de recuperación:", error);
+          toast({
+            title: "Error de recuperación",
+            description: error.message || "Error al procesar el enlace de recuperación",
+            variant: "destructive"
+          });
+        } finally {
+          setLoading(false);
+        }
+      }
+    };
+
+    handleRecoveryToken();
 
     // Limpiar la suscripción
     return () => subscription.unsubscribe();
@@ -166,6 +202,34 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         description: error.message || "Ha ocurrido un error al enviar el correo de recuperación.",
         variant: "destructive"
       });
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const updatePassword = async (password: string) => {
+    try {
+      setLoading(true);
+      const { error } = await supabase.auth.updateUser({
+        password: password
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      toast({
+        title: "Contraseña actualizada",
+        description: "Tu contraseña ha sido actualizada correctamente.",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error al actualizar la contraseña",
+        description: error.message || "Ha ocurrido un error al actualizar la contraseña.",
+        variant: "destructive"
+      });
+      throw error;
     } finally {
       setLoading(false);
     }
@@ -191,6 +255,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         signIn,
         signOut,
         resetPassword,
+        updatePassword,
         devModeEnabled,
         toggleDevMode
       }}

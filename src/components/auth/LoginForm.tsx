@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -27,13 +27,32 @@ const resetPasswordSchema = z.object({
   email: z.string().email({ message: 'Email inválido' }),
 });
 
+const updatePasswordSchema = z.object({
+  password: z.string().min(6, { message: 'La contraseña debe tener al menos 6 caracteres' }),
+  confirmPassword: z.string().min(6, { message: 'La contraseña debe tener al menos 6 caracteres' }),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "Las contraseñas no coinciden",
+  path: ["confirmPassword"],
+});
+
 type LoginFormValues = z.infer<typeof loginSchema>;
 type ResetPasswordFormValues = z.infer<typeof resetPasswordSchema>;
+type UpdatePasswordFormValues = z.infer<typeof updatePasswordSchema>;
 
 const LoginForm: React.FC = () => {
-  const { signIn, resetPassword, loading } = useAuth();
+  const { signIn, resetPassword, updatePassword, loading, session } = useAuth();
   const [isResetPasswordOpen, setIsResetPasswordOpen] = useState(false);
   const [resetLoading, setResetLoading] = useState(false);
+  const [isRecoveryMode, setIsRecoveryMode] = useState(false);
+
+  // Verificar si estamos en modo de recuperación de contraseña
+  useEffect(() => {
+    // Comprobar si hay un hash de recuperación o si estamos en una sesión de recuperación
+    const hash = window.location.hash;
+    const isRecovery = hash.includes('type=recovery') || (session?.user?.aud === 'authenticated' && session?.user?.amr?.some(m => m.method === 'otp'));
+    
+    setIsRecoveryMode(isRecovery);
+  }, [session]);
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -47,6 +66,14 @@ const LoginForm: React.FC = () => {
     resolver: zodResolver(resetPasswordSchema),
     defaultValues: {
       email: '',
+    },
+  });
+
+  const updatePasswordForm = useForm<UpdatePasswordFormValues>({
+    resolver: zodResolver(updatePasswordSchema),
+    defaultValues: {
+      password: '',
+      confirmPassword: '',
     },
   });
 
@@ -77,6 +104,77 @@ const LoginForm: React.FC = () => {
     }
   };
 
+  const onUpdatePassword = async (data: UpdatePasswordFormValues) => {
+    try {
+      await updatePassword(data.password);
+      updatePasswordForm.reset();
+      // Una vez actualizada, volvemos al modo normal de login
+      setIsRecoveryMode(false);
+    } catch (error) {
+      console.error('Error al actualizar la contraseña:', error);
+    }
+  };
+
+  // Si estamos en modo de recuperación, mostramos el formulario para establecer una nueva contraseña
+  if (isRecoveryMode) {
+    return (
+      <div className="space-y-4">
+        <div className="text-center mb-6">
+          <h2 className="text-lg font-semibold">Establecer nueva contraseña</h2>
+          <p className="text-sm text-muted-foreground">Ingresa tu nueva contraseña para actualizar tu cuenta</p>
+        </div>
+        
+        <Form {...updatePasswordForm}>
+          <form onSubmit={updatePasswordForm.handleSubmit(onUpdatePassword)} className="space-y-4">
+            <FormField
+              control={updatePasswordForm.control}
+              name="password"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Nueva contraseña</FormLabel>
+                  <FormControl>
+                    <Input 
+                      type="password" 
+                      placeholder="******" 
+                      {...field} 
+                      autoComplete="new-password"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <FormField
+              control={updatePasswordForm.control}
+              name="confirmPassword"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Confirmar contraseña</FormLabel>
+                  <FormControl>
+                    <Input 
+                      type="password" 
+                      placeholder="******" 
+                      {...field} 
+                      autoComplete="new-password"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <Button type="submit" className="w-full" disabled={loading}>
+              {loading ? <Spinner className="mr-2 h-4 w-4" /> : null}
+              Actualizar contraseña
+            </Button>
+          </form>
+        </Form>
+      </div>
+    );
+  }
+
+  // Formulario normal de login
   return (
     <>
       <Form {...form}>
