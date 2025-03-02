@@ -7,7 +7,8 @@ import { PackageFormData } from '@/types/package';
 export type ProcessingErrorType = 
   | 'neighbor_not_found' 
   | 'unclear_image' 
-  | 'generic_error';
+  | 'generic_error'
+  | 'low_confidence';
 
 interface ProcessedImage {
   id: number;
@@ -27,6 +28,7 @@ export function useBulkPackageProcessor() {
   const [uploadedCount, setUploadedCount] = useState(0);
   const [manualItemId, setManualItemId] = useState<number | null>(null);
   const [showManualForm, setShowManualForm] = useState(false);
+  const [confidenceThreshold, setConfidenceThreshold] = useState(80);
 
   const getImageFromItemId = (id: number | null): string => {
     if (!id) return '';
@@ -64,7 +66,7 @@ export function useBulkPackageProcessor() {
     const processedResults = await Promise.all(images.map(async (img) => {
       await new Promise(resolve => setTimeout(resolve, 1500 + Math.random() * 1000));
       const now = new Date();
-      const confidenceScore = Math.round((0.3 + Math.random() * 0.7) * 100);
+      const confidenceScore = Math.round((0.4 + Math.random() * 0.6) * 100);
       
       const randomError = Math.random();
       
@@ -110,6 +112,26 @@ export function useBulkPackageProcessor() {
         };
       }
       
+      if (confidenceScore < confidenceThreshold) {
+        return {
+          ...img,
+          status: 'error' as const,
+          errorMessage: `Confianza insuficiente (${confidenceScore}%)`,
+          errorType: 'low_confidence' as ProcessingErrorType,
+          confidenceScore,
+          packageData: {
+            type: Math.random() > 0.5 ? 'caja' : Math.random() > 0.5 ? 'sobre' : 'bolsa',
+            received_date: now.toISOString(),
+            delivered_date: null,
+            company: Math.random() > 0.7 ? 'Amazon' : 
+                     Math.random() > 0.5 ? 'Mercado Libre' : 
+                     Math.random() > 0.5 ? 'DHL' : 'FedEx',
+            neighbor_id: randomNeighbor.id,
+            images: [img.image]
+          }
+        };
+      }
+      
       const packageData: PackageFormData = {
         type: Math.random() > 0.5 ? 'caja' : Math.random() > 0.5 ? 'sobre' : 'bolsa',
         received_date: now.toISOString(),
@@ -140,6 +162,9 @@ export function useBulkPackageProcessor() {
     
     const successCount = processedResults.filter(item => item.status === 'success').length;
     const errorCount = processedResults.filter(item => item.status === 'error').length;
+    const lowConfidenceCount = processedResults.filter(
+      item => item.errorType === 'low_confidence'
+    ).length;
     
     if (successCount > 0 || errorCount > 0) {
       let description = '';
@@ -164,6 +189,9 @@ export function useBulkPackageProcessor() {
         }
         if (errorsByType.unclear_image) {
           errorDetails.push(`${errorsByType.unclear_image} imágenes poco claras`);
+        }
+        if (errorsByType.low_confidence) {
+          errorDetails.push(`${errorsByType.low_confidence} con baja confianza`);
         }
         if (errorsByType.generic_error) {
           errorDetails.push(`${errorsByType.generic_error} errores generales`);
@@ -266,12 +294,44 @@ export function useBulkPackageProcessor() {
     });
   };
 
+  const updateConfidenceThreshold = (newThreshold: number) => {
+    setConfidenceThreshold(newThreshold);
+    setProcessedImages(prev => 
+      prev.map(item => {
+        if (item.confidenceScore !== undefined) {
+          if (item.confidenceScore >= newThreshold && item.errorType === 'low_confidence') {
+            return {
+              ...item,
+              status: 'success',
+              errorMessage: undefined,
+              errorType: undefined
+            };
+          } else if (item.confidenceScore < newThreshold && item.status === 'success') {
+            return {
+              ...item,
+              status: 'error',
+              errorMessage: `Confianza insuficiente (${item.confidenceScore}%)`,
+              errorType: 'low_confidence'
+            };
+          }
+        }
+        return item;
+      })
+    );
+    
+    toast({
+      title: "Umbral de confianza actualizado",
+      description: `El umbral de confianza se ha actualizado a ${newThreshold}%.`
+    });
+  };
+
   return {
     isProcessing,
     processedImages,
     uploadedCount,
     manualItemId,
     showManualForm,
+    confidenceThreshold,
     getImageFromItemId,
     handleImageUpload,
     registerPackages,
@@ -280,6 +340,7 @@ export function useBulkPackageProcessor() {
     handleRetryItem,
     openManualForm,
     handleManualSubmit,
-    setShowManualForm
+    setShowManualForm,
+    updateConfidenceThreshold
   };
 }

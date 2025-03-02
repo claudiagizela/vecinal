@@ -16,6 +16,7 @@ const BulkPackageRegistration = () => {
     uploadedCount,
     manualItemId,
     showManualForm,
+    confidenceThreshold,
     getImageFromItemId,
     handleImageUpload,
     registerPackages,
@@ -24,7 +25,8 @@ const BulkPackageRegistration = () => {
     handleRetryItem,
     openManualForm,
     handleManualSubmit,
-    setShowManualForm
+    setShowManualForm,
+    updateConfidenceThreshold
   } = useBulkPackageProcessor();
 
   return (
@@ -34,7 +36,9 @@ const BulkPackageRegistration = () => {
       <main className="max-w-4xl mx-auto px-6 pb-16 animate-fade-in space-y-6">
         <ImageUploader 
           isProcessing={isProcessing} 
-          onImagesSelected={handleImageUpload} 
+          onImagesSelected={handleImageUpload}
+          confidenceThreshold={confidenceThreshold}
+          onConfidenceThresholdChange={updateConfidenceThreshold}
         />
             
         <SuccessAlert count={uploadedCount} />

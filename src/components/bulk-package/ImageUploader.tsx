@@ -3,13 +3,21 @@ import React from 'react';
 import { Upload } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { Slider } from '@/components/ui/slider';
 
 interface ImageUploaderProps {
   isProcessing: boolean;
   onImagesSelected: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  confidenceThreshold?: number;
+  onConfidenceThresholdChange?: (value: number) => void;
 }
 
-const ImageUploader: React.FC<ImageUploaderProps> = ({ isProcessing, onImagesSelected }) => {
+const ImageUploader: React.FC<ImageUploaderProps> = ({ 
+  isProcessing, 
+  onImagesSelected,
+  confidenceThreshold = 80,
+  onConfidenceThresholdChange
+}) => {
   return (
     <Card className="w-full">
       <CardContent className="pt-6">
@@ -36,6 +44,26 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ isProcessing, onImagesSel
             <Upload size={16} />
             Seleccionar Imágenes
           </Button>
+
+          {onConfidenceThresholdChange && (
+            <div className="w-full mt-6">
+              <div className="flex justify-between items-center mb-2">
+                <span className="text-sm font-medium">Umbral de confianza: {confidenceThreshold}%</span>
+              </div>
+              <Slider
+                defaultValue={[confidenceThreshold]}
+                min={50}
+                max={95}
+                step={5}
+                onValueChange={(value) => onConfidenceThresholdChange(value[0])}
+                disabled={isProcessing}
+                className="w-full"
+              />
+              <p className="text-xs text-muted-foreground mt-2">
+                Ajusta este valor para determinar el nivel mínimo de confianza requerido para aceptar automáticamente una lectura de etiqueta.
+              </p>
+            </div>
+          )}
         </div>
       </CardContent>
     </Card>
