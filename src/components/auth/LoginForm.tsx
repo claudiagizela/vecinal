@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
@@ -7,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Spinner } from '@/components/ui/spinner';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/context/auth';
 
 const loginSchema = z.object({
   email: z.string().email({ message: 'Email inválido' }),
@@ -44,7 +43,6 @@ const LoginForm: React.FC = () => {
     }
   };
 
-  // Check if we have a recovery token (this would come from password reset email)
   const isRecoveryMode = session?.user && window.location.hash.includes('type=recovery');
 
   if (isRecoveryMode) {
@@ -156,7 +154,6 @@ const LoginForm: React.FC = () => {
   );
 };
 
-// Component for setting new password
 const PasswordResetForm: React.FC = () => {
   const { updatePassword, loading } = useAuth();
   const [success, setSuccess] = useState(false);
