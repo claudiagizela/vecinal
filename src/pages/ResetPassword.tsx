@@ -9,6 +9,8 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
+import { toast } from '@/components/ui/use-toast';
+import { useNavigate } from 'react-router-dom';
 
 const resetSchema = z.object({
   email: z.string().email({ message: 'Email inválido' }),
@@ -19,6 +21,7 @@ type ResetFormValues = z.infer<typeof resetSchema>;
 const ResetPassword = () => {
   const { resetPassword, loading } = useAuth();
   const [isResetSent, setIsResetSent] = useState(false);
+  const navigate = useNavigate();
 
   const form = useForm<ResetFormValues>({
     resolver: zodResolver(resetSchema),
@@ -29,10 +32,24 @@ const ResetPassword = () => {
 
   const onSubmit = async (data: ResetFormValues) => {
     try {
+      console.log("Enviando solicitud de recuperación para:", data.email);
       await resetPassword(data.email);
+      console.log("Solicitud de recuperación enviada correctamente");
+      
+      // Mostrar toast explícitamente aquí además del que se muestra en authService
+      toast({
+        title: "Correo enviado",
+        description: "Se ha enviado un enlace de restablecimiento a tu correo electrónico.",
+      });
+      
       setIsResetSent(true);
     } catch (error) {
-      console.error("Error al enviar correo de restablecimiento:", error);
+      console.error("Error detallado al enviar correo de restablecimiento:", error);
+      toast({
+        title: "Error al enviar correo",
+        description: error instanceof Error ? error.message : "Ha ocurrido un error al enviar el correo de restablecimiento.",
+        variant: "destructive"
+      });
     }
   };
 
@@ -47,12 +64,17 @@ const ResetPassword = () => {
         </div>
         
         {isResetSent ? (
-          <div className="bg-green-50 border border-green-200 rounded-md p-4 text-center">
-            <h3 className="font-medium text-green-800">Correo Enviado</h3>
-            <p className="mt-2 text-green-700">
-              Se ha enviado un enlace de restablecimiento a tu correo electrónico.
-              Por favor revisa tu bandeja de entrada.
-            </p>
+          <div className="space-y-4">
+            <div className="bg-green-50 border border-green-200 rounded-md p-4 text-center">
+              <h3 className="font-medium text-green-800">Correo Enviado</h3>
+              <p className="mt-2 text-green-700">
+                Se ha enviado un enlace de restablecimiento a tu correo electrónico.
+                Por favor revisa tu bandeja de entrada.
+              </p>
+            </div>
+            <Button onClick={() => navigate('/auth')} className="w-full">
+              Volver a Iniciar Sesión
+            </Button>
           </div>
         ) : (
           <Form {...form}>
@@ -85,9 +107,11 @@ const ResetPassword = () => {
         )}
         
         <div className="text-center">
-          <Button variant="link" onClick={() => window.location.href = '/auth'}>
-            Volver a Iniciar Sesión
-          </Button>
+          {!isResetSent && (
+            <Button variant="link" onClick={() => navigate('/auth')}>
+              Volver a Iniciar Sesión
+            </Button>
+          )}
         </div>
       </div>
     </AuthLayout>
