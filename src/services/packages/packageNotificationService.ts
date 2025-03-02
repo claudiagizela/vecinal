@@ -14,6 +14,8 @@ export const sendPackageNotification = async (
   notificationType: NotificationType
 ): Promise<void> => {
   try {
+    console.log(`Iniciando envío de notificación de paquete (${notificationType})`, packageData.id);
+    
     // Get neighbor details
     const { data: neighborData, error: neighborError } = await supabase
       .from('neighbors')
