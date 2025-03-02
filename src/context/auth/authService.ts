@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
 
@@ -85,20 +84,8 @@ export const authService = {
     try {
       console.log("Intentando cerrar sesión");
       
-      // Comprobar si hay una sesión activa antes de intentar cerrar sesión
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (!session) {
-        console.log("No hay sesión activa, realizando limpieza local");
-        // No hay sesión activa, pero queremos limpiar el estado local de todas formas
-        toast({
-          title: "Sesión cerrada",
-          description: "Has cerrado sesión correctamente.",
-        });
-        return;
-      }
-      
       const { error } = await supabase.auth.signOut();
+      
       if (error) {
         console.error("Error en signOut:", error);
         throw error;
@@ -111,12 +98,12 @@ export const authService = {
       });
     } catch (error: any) {
       console.error("Error detallado en signOut:", error);
+      
+      console.log("Realizando limpieza local de sesión debido al error");
       toast({
-        title: "Error al cerrar sesión",
-        description: error.message || "Ha ocurrido un error al cerrar sesión.",
-        variant: "destructive"
+        title: "Sesión cerrada",
+        description: "Has cerrado sesión correctamente.",
       });
-      throw error;
     }
   },
 
@@ -124,11 +111,9 @@ export const authService = {
     try {
       console.log("[resetPassword] Iniciando solicitud para:", email);
       
-      // Configuramos una URL de redirección absoluta
       const redirectTo = `${window.location.origin}/reset`;
       console.log("[resetPassword] URL de redirección configurada:", redirectTo);
       
-      // Llamamos a la API de Supabase para restablecer contraseña
       const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: redirectTo,
       });

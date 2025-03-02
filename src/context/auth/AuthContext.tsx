@@ -1,3 +1,4 @@
+
 import React, { createContext, useState, useEffect } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -110,6 +111,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setLoading(true);
     try {
       await authService.signOut();
+      // Ensure we clear the user state even if there was an issue with the Supabase call
+      setUser(null);
+      setSession(null);
+    } catch (error) {
+      console.error("Error during sign out:", error);
+      // Still clear user data on error to maintain UI consistency
+      setUser(null);
+      setSession(null);
     } finally {
       setLoading(false);
     }

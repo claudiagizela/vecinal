@@ -28,8 +28,14 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   }
 
   const handleForceLogout = async () => {
-    await signOut();
-    toggleDevMode();  // This will disable dev mode after logout
+    try {
+      await signOut();
+    } catch (error) {
+      console.error("Error during force logout:", error);
+    } finally {
+      // Ensure dev mode is always disabled after attempting logout
+      toggleDevMode();
+    }
   };
 
   return (
