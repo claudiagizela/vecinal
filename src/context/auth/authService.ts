@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
 
@@ -83,6 +84,19 @@ export const authService = {
   signOut: async () => {
     try {
       console.log("Intentando cerrar sesión");
+      
+      // Comprobar si hay una sesión activa antes de intentar cerrar sesión
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        console.log("No hay sesión activa, realizando limpieza local");
+        // No hay sesión activa, pero queremos limpiar el estado local de todas formas
+        toast({
+          title: "Sesión cerrada",
+          description: "Has cerrado sesión correctamente.",
+        });
+        return;
+      }
       
       const { error } = await supabase.auth.signOut();
       if (error) {
