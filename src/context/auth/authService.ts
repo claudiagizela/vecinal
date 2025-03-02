@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
 
@@ -114,39 +113,33 @@ export const authService = {
 
   resetPassword: async (email: string) => {
     try {
-      console.log("Enviando correo de recuperación a:", email);
+      console.log("[resetPassword] Iniciando solicitud para:", email);
       
-      // URL de redirección configurada correctamente
-      const redirectUrl = `${window.location.origin}/reset`;
-      console.log("URL de redirección:", redirectUrl);
+      // Configuramos una URL de redirección absoluta
+      const redirectTo = `${window.location.origin}/reset`;
+      console.log("[resetPassword] URL de redirección configurada:", redirectTo);
       
-      // Usamos el método correcto de Supabase para enviar correo de recuperación
+      // Limpiamos cualquier toast anterior que pudiera interferir
+      
+      // Llamamos a la API de Supabase para restablecer contraseña
       const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: redirectUrl,
+        redirectTo: redirectTo,
       });
-
-      console.log("Respuesta detallada de resetPasswordForEmail:", { data, error });
 
       if (error) {
-        console.error("Error en resetPassword:", error);
-        throw error;
+        console.error("[resetPassword] Error de Supabase:", error);
+        throw new Error(error.message || "Error al enviar correo de recuperación");
       }
 
-      // En el entorno de desarrollo, Supabase no enviará correos reales, pero la operación debe completarse sin errores
-      console.log("Solicitud de correo de recuperación procesada correctamente");
-      toast({
-        title: "Correo enviado",
-        description: "Se ha enviado un correo con instrucciones para restablecer tu contraseña.",
-      });
+      console.log("[resetPassword] Respuesta de Supabase:", data);
       
-      return { success: true, data };
+      // En desarrollo, Supabase puede no enviar correos reales
+      console.log("[resetPassword] Solicitud procesada correctamente");
+      
+      return { success: true };
     } catch (error: any) {
-      console.error("Error detallado en resetPassword:", error);
-      toast({
-        title: "Error al enviar el correo",
-        description: error.message || "Ha ocurrido un error al enviar el correo de recuperación.",
-        variant: "destructive"
-      });
+      console.error("[resetPassword] Error capturado:", error);
+      // No mostramos toast aquí para evitar duplicados, dejamos que el componente lo maneje
       throw error;
     }
   },

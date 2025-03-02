@@ -21,6 +21,7 @@ type ResetFormValues = z.infer<typeof resetSchema>;
 const ResetPassword = () => {
   const { resetPassword, loading } = useAuth();
   const [isResetSent, setIsResetSent] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
 
   const form = useForm<ResetFormValues>({
@@ -31,31 +32,32 @@ const ResetPassword = () => {
   });
 
   const onSubmit = async (data: ResetFormValues) => {
+    if (isSubmitting) return;
+    
+    setIsSubmitting(true);
     try {
-      console.log("Enviando solicitud de recuperación para:", data.email);
+      console.log("Iniciando proceso de recuperación para:", data.email);
       
-      // Llamamos a resetPassword y esperamos su respuesta
-      const result = await resetPassword(data.email);
-      console.log("Resultado de resetPassword:", result);
+      await resetPassword(data.email);
       
-      // Mostramos un toast de éxito aquí explícitamente
+      // Si no hay error, mostramos el éxito y actualizamos el estado
       toast({
         title: "Correo enviado",
         description: "Se ha enviado un enlace de restablecimiento a tu correo electrónico.",
       });
       
-      // Indicamos que el correo ha sido enviado
       setIsResetSent(true);
       
     } catch (error) {
-      console.error("Error detallado al enviar correo de restablecimiento:", error);
+      console.error("Error al enviar correo de restablecimiento:", error);
       
-      // Mostramos un toast de error si hay algún problema
       toast({
         title: "Error al enviar correo",
         description: error instanceof Error ? error.message : "Ha ocurrido un error al enviar el correo de restablecimiento.",
         variant: "destructive"
       });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -104,8 +106,8 @@ const ResetPassword = () => {
                 )}
               />
               
-              <Button type="submit" className="w-full" disabled={loading}>
-                {loading ? <Spinner className="mr-2 h-4 w-4" /> : null}
+              <Button type="submit" className="w-full" disabled={isSubmitting || loading}>
+                {(isSubmitting || loading) ? <Spinner className="mr-2 h-4 w-4" /> : null}
                 Enviar Correo de Restablecimiento
               </Button>
             </form>
