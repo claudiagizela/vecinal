@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { usePackages } from '@/context/PackageContext';
 import { useAuth } from '@/context/auth';
@@ -32,10 +31,8 @@ const Packages = () => {
   const [currentPackageId, setCurrentPackageId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'pending' | 'delivered'>('pending');
 
-  // Check if user is a vecino
   const isVecino = user?.user_metadata?.role === 'vecino';
   
-  // Get packages based on user role
   const userPackages = isVecino && user?.id 
     ? getNeighborPackages(user.id) 
     : packages;
@@ -128,7 +125,6 @@ const Packages = () => {
                 </div>
               </div>
               
-              {/* Only show action buttons for guards (non-vecinos) */}
               {!isVecino && (
                 <div className="flex space-x-2">
                   <Button 
@@ -171,7 +167,7 @@ const Packages = () => {
               packages={filteredPackages}
               onEdit={!isVecino ? handleEditPackage : undefined}
               onDelete={!isVecino ? deletePackage : undefined}
-              onMarkDelivered={!isVecino ? markAsDelivered : undefined}
+              onMarkDelivered={isVecino || !isVecino ? markAsDelivered : undefined}
               onMarkPending={!isVecino ? markAsPending : undefined}
             />
           </div>

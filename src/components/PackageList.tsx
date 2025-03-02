@@ -25,6 +25,7 @@ const PackageList: React.FC<PackageListProps> = ({
   onDelete,
   onMarkDelivered,
   onMarkPending,
+  onResendNotification,
   className,
 }) => {
   const [search, setSearch] = useState('');
@@ -52,7 +53,9 @@ const PackageList: React.FC<PackageListProps> = ({
   };
 
   // Check if we're in read-only mode (vecino view)
-  const isReadOnly = !onEdit && !onDelete && !onMarkDelivered;
+  const isReadOnly = !onEdit && !onDelete;
+  // Check if we're in vecino mode (can mark as received but can't edit/delete)
+  const isVecinoView = !onEdit && !onDelete && onMarkDelivered;
 
   return (
     <div className={cn("space-y-4", className)}>
@@ -77,6 +80,7 @@ const PackageList: React.FC<PackageListProps> = ({
                 onDelete={onDelete ? confirmDelete : undefined}
                 onMarkDelivered={onMarkDelivered}
                 onMarkPending={onMarkPending}
+                isVecinoView={isVecinoView}
               />
             ))}
           </div>
