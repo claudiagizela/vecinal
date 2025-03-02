@@ -116,22 +116,24 @@ export const authService = {
     try {
       console.log("Enviando correo de recuperación a:", email);
       
-      // URL de redirección actualizada usando window.location.origin para ser dinámica
+      // URL de redirección configurada correctamente
       const redirectUrl = `${window.location.origin}/reset`;
       console.log("URL de redirección:", redirectUrl);
       
+      // Usamos el método correcto de Supabase para enviar correo de recuperación
       const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: redirectUrl,
       });
 
-      console.log("Respuesta de supabase:", { data, error });
+      console.log("Respuesta detallada de resetPasswordForEmail:", { data, error });
 
       if (error) {
         console.error("Error en resetPassword:", error);
         throw error;
       }
 
-      console.log("Correo de recuperación enviado exitosamente");
+      // En el entorno de desarrollo, Supabase no enviará correos reales, pero la operación debe completarse sin errores
+      console.log("Solicitud de correo de recuperación procesada correctamente");
       toast({
         title: "Correo enviado",
         description: "Se ha enviado un correo con instrucciones para restablecer tu contraseña.",
