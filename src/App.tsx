@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -12,6 +13,8 @@ import Packages from "./pages/Packages";
 import BulkPackageRegistration from "./pages/BulkPackageRegistration";
 import Users from "./pages/Users";
 import Auth from "./pages/Auth";
+import SetupPassword from "./pages/SetupPassword";
+import ResetPassword from "./pages/ResetPassword";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -27,6 +30,8 @@ const App = () => (
               <Sonner />
               <Routes>
                 <Route path="/auth" element={<Auth />} />
+                <Route path="/setup" element={<SetupPassword />} />
+                <Route path="/reset" element={<ResetPassword />} />
                 <Route 
                   path="/" 
                   element={

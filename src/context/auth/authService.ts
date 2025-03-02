@@ -116,8 +116,9 @@ export const authService = {
     try {
       console.log("Enviando correo de recuperación a:", email);
       
+      // Actualizada la URL de redirección para que vaya a /reset
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: window.location.origin + '/auth',
+        redirectTo: "http://vecinal.lovable.app/reset",
       });
 
       if (error) {
