@@ -8,6 +8,7 @@ import { cn } from '@/lib/utils';
 import PackageItem from './package/PackageItem';
 import PackageEmptyState from './package/PackageEmptyState';
 import DeletePackageDialog from './package/DeletePackageDialog';
+import { useAuth } from '@/context/auth';
 
 interface PackageListProps {
   packages: Package[];
@@ -30,6 +31,10 @@ const PackageList: React.FC<PackageListProps> = ({
 }) => {
   const [search, setSearch] = useState('');
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const { user } = useAuth();
+  
+  // Check if user is a vecino
+  const isVecino = user?.user_metadata?.role === 'vecino';
 
   const filteredPackages = packages.filter((pkg) =>
     `${pkg.neighbor?.name || ''} ${pkg.neighbor?.last_name || ''} ${pkg.neighbor?.second_last_name || ''} ${pkg.neighbor?.apartment || ''} ${pkg.company} ${pkg.type}`
@@ -59,15 +64,18 @@ const PackageList: React.FC<PackageListProps> = ({
 
   return (
     <div className={cn("space-y-4", className)}>
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" size={18} />
-        <Input
-          placeholder={isReadOnly ? "Buscar en mis paquetes..." : "Buscar paquetes..."}
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="pl-10"
-        />
-      </div>
+      {/* Only show search in non-vecino view */}
+      {!isVecino && (
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" size={18} />
+          <Input
+            placeholder={isReadOnly ? "Buscar en mis paquetes..." : "Buscar paquetes..."}
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="pl-10"
+          />
+        </div>
+      )}
       
       {filteredPackages.length > 0 ? (
         <ScrollArea className="h-[60vh] pr-4 -mr-4">
