@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
@@ -10,7 +11,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useAuth } from '@/context/auth';
 
 const signupSchema = z.object({
-  username: z.string().min(3, { message: 'El nombre de usuario debe tener al menos 3 caracteres' }),
   fullName: z.string().min(3, { message: 'El nombre completo debe tener al menos 3 caracteres' }),
   email: z.string().email({ message: 'Email inválido' }),
   password: z.string().min(6, { message: 'La contraseña debe tener al menos 6 caracteres' }),
@@ -31,7 +31,6 @@ const SignupForm: React.FC = () => {
   const form = useForm<SignupFormValues>({
     resolver: zodResolver(signupSchema),
     defaultValues: {
-      username: '',
       fullName: '',
       email: '',
       password: '',
@@ -42,7 +41,8 @@ const SignupForm: React.FC = () => {
 
   const onSubmit = (data: SignupFormValues) => {
     console.log("Signup form data:", data); // Log form data for debugging
-    signUp(data.email, data.password, data.userType, data.username, data.fullName);
+    // Usamos el email como nombre de usuario y el fullName para el nombre completo
+    signUp(data.email, data.password, data.userType, data.email, data.fullName);
   };
 
   const isVerificationMode = session?.user && window.location.hash.includes('type=signup');
@@ -62,24 +62,6 @@ const SignupForm: React.FC = () => {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <FormField
-          control={form.control}
-          name="username"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Nombre de Usuario</FormLabel>
-              <FormControl>
-                <Input 
-                  placeholder="usuario123" 
-                  autoComplete="username"
-                  {...field} 
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        
         <FormField
           control={form.control}
           name="fullName"
