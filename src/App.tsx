@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -6,7 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { NeighborProvider } from "@/context/NeighborContext";
 import { PackageProvider } from "@/context/PackageContext";
-import { AuthProvider } from "@/context/AuthContext";
+import { AuthProvider } from "@/context/auth";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import Neighbors from "./pages/Neighbors";
 import Packages from "./pages/Packages";

@@ -1,10 +1,9 @@
-
 import React from 'react';
 import { Users, Package, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useNeighbors } from '@/context/NeighborContext';
 import { useLocation } from 'react-router-dom';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/context/auth';
 
 interface HeaderProps {
   onAddNew: () => void;

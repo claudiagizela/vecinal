@@ -1,6 +1,5 @@
-
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/context/auth';
 import { Navigate } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import AuthLayout from '@/components/auth/AuthLayout';
@@ -13,23 +12,18 @@ const Auth = () => {
   const { user, devModeEnabled, toggleDevMode, session } = useAuth();
   const [activeTab, setActiveTab] = useState<'login' | 'signup'>('login');
 
-  // Check URL hash for recovery or signup tokens
   useEffect(() => {
     const hash = window.location.hash;
     if (hash) {
-      // If it's a recovery token, switch to login tab
       if (hash.includes('type=recovery')) {
         setActiveTab('login');
-      }
-      // If it's a signup verification token, switch to signup tab
-      else if (hash.includes('type=signup')) {
+      } else if (hash.includes('type=signup')) {
         setActiveTab('signup');
       }
     }
   }, []);
 
   if (user || devModeEnabled) {
-    // Only redirect if not in recovery or verification mode
     const isRecoveryOrVerification = window.location.hash.includes('type=recovery') || 
                                      window.location.hash.includes('type=signup');
     
