@@ -1,4 +1,3 @@
-
 import React, { createContext, useState, useEffect } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -43,7 +42,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const handleRecoveryToken = async () => {
       const hash = window.location.hash;
       if (hash && (hash.includes('type=recovery') || hash.includes('type=signup'))) {
-        window.location.hash = '';
         try {
           setLoading(true);
           const { data, error } = await supabase.auth.refreshSession();
@@ -51,6 +49,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           if (error) {
             throw error;
           }
+
+          setTimeout(() => {
+            // We'll keep the hash for the UI to read it, but we have already processed it
+          }, 100);
 
           toast({
             title: "Sesión verificada",
