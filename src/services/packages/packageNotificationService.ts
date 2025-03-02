@@ -33,6 +33,8 @@ export const sendPackageNotification = async (
     // Use email if available, or mobile_number as fallback
     const contactEmail = neighborData.email || `${neighborData.mobile_number}@example.com`;
     
+    console.log(`Enviando notificación de paquete (${notificationType}) a:`, contactEmail);
+    
     // Call edge function using supabase.functions.invoke
     const { data: responseData, error: responseError } = await supabase.functions.invoke(
       'send-package-notification',
@@ -59,6 +61,8 @@ export const sendPackageNotification = async (
       console.error(`Error sending ${notificationType} notification email:`, responseError);
       throw new Error(`Error al enviar la notificación por correo: ${responseError.message}`);
     }
+    
+    console.log(`Notificación de paquete (${notificationType}) enviada con éxito:`, responseData);
     
     return responseData;
   } catch (error) {

@@ -1,3 +1,4 @@
+
 import React, { createContext, useState, useEffect } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -34,6 +35,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setInitialSession();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      console.log("Auth state changed:", _event);
       setSession(session);
       setUser(session?.user || null);
       setLoading(false);
@@ -41,15 +43,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const handleRecoveryToken = async () => {
       const hash = window.location.hash;
+      console.log("Current hash:", hash);
+      
       if (hash && (hash.includes('type=recovery') || hash.includes('type=signup'))) {
         try {
           setLoading(true);
+          console.log("Processing token in hash");
+          
           const { data, error } = await supabase.auth.refreshSession();
           
           if (error) {
+            console.error("Error refreshing session:", error);
             throw error;
           }
 
+          console.log("Session refreshed successfully:", data);
+
+          // No eliminamos el hash inmediatamente para que la UI pueda detectar
+          // el tipo de acción (recuperación o registro)
           setTimeout(() => {
             // We'll keep the hash for the UI to read it, but we have already processed it
           }, 100);

@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
 
@@ -20,13 +19,24 @@ export const authService = {
         throw error;
       }
 
-      toast({
-        title: "Registro exitoso",
-        description: "Se ha enviado un correo de confirmación a tu dirección de email.",
-      });
+      // Check if user needs to confirm email
+      if (data.user && data.user.identities && data.user.identities.length === 0) {
+        // This indicates the user already exists but hasn't confirmed their email
+        toast({
+          title: "Email ya registrado",
+          description: "Esta dirección de correo ya está registrada pero no confirmada. Se ha enviado un nuevo correo de verificación.",
+          variant: "destructive"
+        });
+      } else {
+        toast({
+          title: "Registro exitoso",
+          description: "Se ha enviado un correo de confirmación a tu dirección de email.",
+        });
+      }
       
       return data;
     } catch (error: any) {
+      console.error("Error en signUp:", error);
       toast({
         title: "Error al registrarse",
         description: error.message || "Ha ocurrido un error al crear la cuenta.",
@@ -85,11 +95,14 @@ export const authService = {
 
   resetPassword: async (email: string) => {
     try {
+      console.log("Enviando correo de recuperación a:", email);
+      
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: window.location.origin + '/auth',
       });
 
       if (error) {
+        console.error("Error en resetPassword:", error);
         throw error;
       }
 
@@ -98,6 +111,7 @@ export const authService = {
         description: "Se ha enviado un correo con instrucciones para restablecer tu contraseña.",
       });
     } catch (error: any) {
+      console.error("Error detallado en resetPassword:", error);
       toast({
         title: "Error al enviar el correo",
         description: error.message || "Ha ocurrido un error al enviar el correo de recuperación.",
