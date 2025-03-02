@@ -10,9 +10,9 @@ import PackageActions from './PackageActions';
 
 interface PackageItemProps {
   pkg: Package;
-  onEdit: (id: string) => void;
-  onDelete: (id: string) => void;
-  onMarkDelivered: (id: string) => void;
+  onEdit?: (id: string) => void;
+  onDelete?: (id: string) => void;
+  onMarkDelivered?: (id: string) => void;
   onMarkPending?: (id: string) => void;
 }
 
@@ -23,6 +23,9 @@ const PackageItem: React.FC<PackageItemProps> = ({
   onMarkDelivered,
   onMarkPending,
 }) => {
+  // Determine if we're showing this in read-only mode (for vecinos)
+  const isReadOnly = !onEdit && !onDelete && !onMarkDelivered;
+
   return (
     <Card key={pkg.id} className="overflow-hidden transition-all duration-200 hover:shadow-md animate-fade-in">
       <CardContent className="p-4">
@@ -33,14 +36,25 @@ const PackageItem: React.FC<PackageItemProps> = ({
                 <div className="rounded-full bg-primary/10 p-2 text-primary">
                   <PackageIcon size={16} />
                 </div>
-                <div>
-                  <h3 className="font-medium">
-                    {pkg.neighbor?.name} {pkg.neighbor?.last_name} {pkg.neighbor?.second_last_name}
-                  </h3>
-                  <span className="text-xs text-muted-foreground">
-                    Apto {pkg.neighbor?.apartment}
-                  </span>
-                </div>
+                {isReadOnly ? (
+                  <div>
+                    <h3 className="font-medium">
+                      Paquete de {pkg.company}
+                    </h3>
+                    <span className="text-xs text-muted-foreground capitalize">
+                      {pkg.type}
+                    </span>
+                  </div>
+                ) : (
+                  <div>
+                    <h3 className="font-medium">
+                      {pkg.neighbor?.name} {pkg.neighbor?.last_name} {pkg.neighbor?.second_last_name}
+                    </h3>
+                    <span className="text-xs text-muted-foreground">
+                      Apto {pkg.neighbor?.apartment}
+                    </span>
+                  </div>
+                )}
               </div>
               <div>
                 <PackageStatusBadge isDelivered={!!pkg.delivered_date} />
@@ -48,14 +62,18 @@ const PackageItem: React.FC<PackageItemProps> = ({
             </div>
             
             <div className="grid grid-cols-2 gap-x-4 gap-y-2 mt-3 text-sm">
-              <div className="flex items-center text-muted-foreground">
-                <PackageTypeIcon type={pkg.type} />
-                <span className="capitalize">{pkg.type}</span>
-              </div>
-              <div className="flex items-center text-muted-foreground">
-                <Building2 size={14} className="mr-1" />
-                <span>{pkg.company}</span>
-              </div>
+              {!isReadOnly && (
+                <>
+                  <div className="flex items-center text-muted-foreground">
+                    <PackageTypeIcon type={pkg.type} />
+                    <span className="capitalize">{pkg.type}</span>
+                  </div>
+                  <div className="flex items-center text-muted-foreground">
+                    <Building2 size={14} className="mr-1" />
+                    <span>{pkg.company}</span>
+                  </div>
+                </>
+              )}
               <div className="flex items-center text-muted-foreground col-span-2">
                 <Calendar size={14} className="mr-1" />
                 <span>
@@ -72,13 +90,15 @@ const PackageItem: React.FC<PackageItemProps> = ({
               )}
             </div>
             
-            <PackageActions 
-              isDelivered={!!pkg.delivered_date}
-              onMarkDelivered={() => onMarkDelivered(pkg.id)}
-              onMarkPending={onMarkPending ? () => onMarkPending(pkg.id) : undefined}
-              onEdit={() => onEdit(pkg.id)}
-              onDelete={() => onDelete(pkg.id)}
-            />
+            {!isReadOnly && (
+              <PackageActions 
+                isDelivered={!!pkg.delivered_date}
+                onMarkDelivered={onMarkDelivered ? () => onMarkDelivered(pkg.id) : undefined}
+                onMarkPending={onMarkPending ? () => onMarkPending(pkg.id) : undefined}
+                onEdit={onEdit ? () => onEdit(pkg.id) : undefined}
+                onDelete={onDelete ? () => onDelete(pkg.id) : undefined}
+              />
+            )}
           </div>
         </div>
       </CardContent>

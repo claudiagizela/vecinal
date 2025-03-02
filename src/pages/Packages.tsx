@@ -1,5 +1,7 @@
+
 import React, { useState } from 'react';
 import { usePackages } from '@/context/PackageContext';
+import { useAuth } from '@/context/auth';
 import Header from '@/components/Header';
 import Sidebar from '@/components/Sidebar';
 import PackageForm from '@/components/PackageForm';
@@ -21,14 +23,24 @@ const Packages = () => {
     deletePackage, 
     getPackage, 
     markAsDelivered, 
-    markAsPending, 
+    markAsPending,
+    getNeighborPackages,
     loading 
   } = usePackages();
+  const { user } = useAuth();
   const [formOpen, setFormOpen] = useState(false);
   const [currentPackageId, setCurrentPackageId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'pending' | 'delivered'>('pending');
 
-  const filteredPackages = packages.filter(pkg => {
+  // Check if user is a vecino
+  const isVecino = user?.user_metadata?.role === 'vecino';
+  
+  // Get packages based on user role
+  const userPackages = isVecino && user?.id 
+    ? getNeighborPackages(user.id) 
+    : packages;
+
+  const filteredPackages = userPackages.filter(pkg => {
     if (activeTab === 'pending') return !pkg.delivered_date;
     if (activeTab === 'delivered') return !!pkg.delivered_date;
     return true;
@@ -91,8 +103,8 @@ const Packages = () => {
     );
   }
 
-  const pendingCount = packages.filter(p => !p.delivered_date).length;
-  const deliveredCount = packages.filter(p => !!p.delivered_date).length;
+  const pendingCount = userPackages.filter(p => !p.delivered_date).length;
+  const deliveredCount = userPackages.filter(p => !!p.delivered_date).length;
 
   return (
     <div className="min-h-screen bg-background flex">
@@ -106,29 +118,36 @@ const Packages = () => {
                   <PackageIcon size={24} />
                 </div>
                 <div>
-                  <h1 className="text-xl font-medium">Registro de Paquetes</h1>
+                  <h1 className="text-xl font-medium">
+                    {isVecino ? 'Mis Paquetes' : 'Registro de Paquetes'}
+                  </h1>
                   <p className="text-sm text-muted-foreground">
-                    {packages.length} {packages.length === 1 ? 'paquete' : 'paquetes'} registrados
+                    {userPackages.length} {userPackages.length === 1 ? 'paquete' : 'paquetes'} 
+                    {isVecino ? ' registrados a tu nombre' : ' registrados'}
                   </p>
                 </div>
               </div>
-              <div className="flex space-x-2">
-                <Button 
-                  onClick={handleOpenForm}
-                  variant="outline"
-                  className="gap-2"
-                >
-                  <PackagePlus size={16} />
-                  Registrar Paquete
-                </Button>
-                <Link 
-                  to="/bulk-packages"
-                  className="inline-flex items-center justify-center rounded-md text-sm font-medium gap-2 ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
-                >
-                  <ImageIcon size={16} />
-                  Registro por Foto
-                </Link>
-              </div>
+              
+              {/* Only show action buttons for guards (non-vecinos) */}
+              {!isVecino && (
+                <div className="flex space-x-2">
+                  <Button 
+                    onClick={handleOpenForm}
+                    variant="outline"
+                    className="gap-2"
+                  >
+                    <PackagePlus size={16} />
+                    Registrar Paquete
+                  </Button>
+                  <Link 
+                    to="/bulk-packages"
+                    className="inline-flex items-center justify-center rounded-md text-sm font-medium gap-2 ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
+                  >
+                    <ImageIcon size={16} />
+                    Registro por Foto
+                  </Link>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -150,27 +169,29 @@ const Packages = () => {
           <div className="grid grid-cols-1 gap-8">
             <PackageList 
               packages={filteredPackages}
-              onEdit={handleEditPackage}
-              onDelete={deletePackage}
-              onMarkDelivered={markAsDelivered}
-              onMarkPending={markAsPending}
+              onEdit={!isVecino ? handleEditPackage : undefined}
+              onDelete={!isVecino ? deletePackage : undefined}
+              onMarkDelivered={!isVecino ? markAsDelivered : undefined}
+              onMarkPending={!isVecino ? markAsPending : undefined}
             />
           </div>
         </main>
 
-        <Dialog open={formOpen} onOpenChange={setFormOpen}>
-          <DialogContent className="max-w-md animate-slide-up">
-            <DialogHeader>
-              <DialogTitle>
-                {currentPackageId ? 'Editar Paquete' : 'Registrar Nuevo Paquete'}
-              </DialogTitle>
-            </DialogHeader>
-            <PackageForm
-              initialData={currentPackage}
-              onSubmit={handleSubmit}
-            />
-          </DialogContent>
-        </Dialog>
+        {!isVecino && (
+          <Dialog open={formOpen} onOpenChange={setFormOpen}>
+            <DialogContent className="max-w-md animate-slide-up">
+              <DialogHeader>
+                <DialogTitle>
+                  {currentPackageId ? 'Editar Paquete' : 'Registrar Nuevo Paquete'}
+                </DialogTitle>
+              </DialogHeader>
+              <PackageForm
+                initialData={currentPackage}
+                onSubmit={handleSubmit}
+              />
+            </DialogContent>
+          </Dialog>
+        )}
       </div>
     </div>
   );

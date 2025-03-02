@@ -20,7 +20,6 @@ export const PackageProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const [loading, setLoading] = useState(true);
   const { neighbors } = useNeighbors();
 
-  // Load data from Supabase on mount
   useEffect(() => {
     loadPackages();
   }, []);
@@ -42,7 +41,6 @@ export const PackageProvider: React.FC<{ children: React.ReactNode }> = ({ child
     }
   };
 
-  // Enrich packages with neighbor data
   const enrichedPackages = packages.map(pkg => {
     const neighbor = neighbors.find(n => n.id === pkg.neighbor_id);
     return {
@@ -57,12 +55,10 @@ export const PackageProvider: React.FC<{ children: React.ReactNode }> = ({ child
       
       if (!newPackageId) return;
       
-      // Fetch the newly created package with images
       const packagesData = await fetchPackagesWithImages();
       const newPackage = packagesData.find(p => p.id === newPackageId);
       
       if (newPackage) {
-        // Add to local state
         setPackages((prev) => [newPackage, ...prev]);
         
         const neighbor = neighbors.find(n => n.id === data.neighbor_id);
@@ -89,7 +85,6 @@ export const PackageProvider: React.FC<{ children: React.ReactNode }> = ({ child
     try {
       await updatePackageData(id, data);
       
-      // Update local state
       setPackages((prev) => 
         prev.map((pkg) => 
           pkg.id === id ? { ...pkg, ...data, id } : pkg
@@ -116,7 +111,6 @@ export const PackageProvider: React.FC<{ children: React.ReactNode }> = ({ child
       
       await deletePackageData(id);
       
-      // Update local state
       setPackages((prev) => prev.filter((p) => p.id !== id));
       
       if (pkg) {
@@ -142,15 +136,28 @@ export const PackageProvider: React.FC<{ children: React.ReactNode }> = ({ child
     return enrichedPackages.find((pkg) => pkg.id === id);
   };
 
-  const getNeighborPackages = (neighborId: string) => {
-    return enrichedPackages.filter((pkg) => pkg.neighbor_id === neighborId);
+  const getNeighborPackages = (userId: string) => {
+    const neighbor = neighbors.find(n => n.id === userId);
+    
+    if (!neighbor) {
+      const neighborByEmail = neighbors.find(
+        n => n.email && n.email.toLowerCase() === userId.toLowerCase()
+      );
+      
+      if (neighborByEmail) {
+        return enrichedPackages.filter((pkg) => pkg.neighbor_id === neighborByEmail.id);
+      }
+      
+      return [];
+    }
+    
+    return enrichedPackages.filter((pkg) => pkg.neighbor_id === neighbor.id);
   };
 
   const markAsDelivered = async (id: string) => {
     try {
       const delivered_date = await markPackageAsDelivered(id);
       
-      // Update local state
       setPackages((prev) => 
         prev.map((pkg) => 
           pkg.id === id ? { ...pkg, delivered_date } : pkg
@@ -181,7 +188,6 @@ export const PackageProvider: React.FC<{ children: React.ReactNode }> = ({ child
     try {
       await markPackageAsPending(id);
       
-      // Update local state
       setPackages((prev) => 
         prev.map((pkg) => 
           pkg.id === id ? { ...pkg, delivered_date: null } : pkg

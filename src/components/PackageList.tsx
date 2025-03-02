@@ -11,9 +11,9 @@ import DeletePackageDialog from './package/DeletePackageDialog';
 
 interface PackageListProps {
   packages: Package[];
-  onEdit: (id: string) => void;
-  onDelete: (id: string) => void;
-  onMarkDelivered: (id: string) => void;
+  onEdit?: (id: string) => void;
+  onDelete?: (id: string) => void;
+  onMarkDelivered?: (id: string) => void;
   onMarkPending?: (id: string) => void;
   onResendNotification?: (id: string) => void;
   className?: string;
@@ -41,7 +41,7 @@ const PackageList: React.FC<PackageListProps> = ({
   };
 
   const handleDelete = () => {
-    if (deleteId) {
+    if (deleteId && onDelete) {
       onDelete(deleteId);
       setDeleteId(null);
     }
@@ -51,12 +51,15 @@ const PackageList: React.FC<PackageListProps> = ({
     setDeleteId(null);
   };
 
+  // Check if we're in read-only mode (vecino view)
+  const isReadOnly = !onEdit && !onDelete && !onMarkDelivered;
+
   return (
     <div className={cn("space-y-4", className)}>
       <div className="relative">
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" size={18} />
         <Input
-          placeholder="Buscar paquetes..."
+          placeholder={isReadOnly ? "Buscar en mis paquetes..." : "Buscar paquetes..."}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="pl-10"
@@ -71,7 +74,7 @@ const PackageList: React.FC<PackageListProps> = ({
                 key={pkg.id}
                 pkg={pkg}
                 onEdit={onEdit}
-                onDelete={confirmDelete}
+                onDelete={onDelete ? confirmDelete : undefined}
                 onMarkDelivered={onMarkDelivered}
                 onMarkPending={onMarkPending}
               />
@@ -79,15 +82,20 @@ const PackageList: React.FC<PackageListProps> = ({
           </div>
         </ScrollArea>
       ) : (
-        <PackageEmptyState hasSearchFilter={search !== ''} />
+        <PackageEmptyState 
+          hasSearchFilter={search !== ''} 
+          isReadOnly={isReadOnly}
+        />
       )}
 
-      <DeletePackageDialog
-        open={!!deleteId}
-        onOpenChange={(open) => !open && cancelDelete()}
-        onConfirm={handleDelete}
-        onCancel={cancelDelete}
-      />
+      {onDelete && (
+        <DeletePackageDialog
+          open={!!deleteId}
+          onOpenChange={(open) => !open && cancelDelete()}
+          onConfirm={handleDelete}
+          onCancel={cancelDelete}
+        />
+      )}
     </div>
   );
 };
