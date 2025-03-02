@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { usePackages } from '@/context/PackageContext';
 import { useNeighbors } from '@/context/NeighborContext';
@@ -13,7 +12,7 @@ import {
   showManualUpdateSuccess
 } from './bulk-processor/notificationHandler';
 
-export { ProcessingErrorType } from './bulk-processor/types';
+export type { ProcessingErrorType } from './bulk-processor/types';
 
 export function useBulkPackageProcessor() {
   const { addPackage } = usePackages();
