@@ -1,6 +1,7 @@
 
 import React, { useState } from 'react';
 import { useNeighbors } from '@/context/NeighborContext';
+import { useAuth } from '@/context/auth';
 import Header from '@/components/Header';
 import Sidebar from '@/components/Sidebar';
 import NeighborForm from '@/components/NeighborForm';
@@ -12,8 +13,11 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 const Index = () => {
   const { neighbors, addNeighbor, updateNeighbor, deleteNeighbor, getNeighbor, loading } = useNeighbors();
+  const { user } = useAuth();
   const [formOpen, setFormOpen] = useState(false);
   const [currentNeighborId, setCurrentNeighborId] = useState<string | null>(null);
+
+  const isVecino = user?.user_metadata?.role === 'vecino';
 
   const handleOpenForm = () => {
     setCurrentNeighborId(null);

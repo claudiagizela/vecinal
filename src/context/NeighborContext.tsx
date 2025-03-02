@@ -156,12 +156,19 @@ export const NeighborProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     return neighbors.find((neighbor) => neighbor.id === id);
   };
 
-  // New function to get the current user's neighbor profile
+  // Updated function to get the current user's neighbor profile
   const getCurrentUserNeighbor = () => {
     if (!user) return undefined;
     
-    // Find neighbor with matching email
-    return neighbors.find((neighbor) => neighbor.email === user.email);
+    // First try to find by user_id (most accurate method)
+    let neighbor = neighbors.find((neighbor) => neighbor.user_id === user.id);
+    
+    // If not found by user_id, try to find by email as a fallback
+    if (!neighbor) {
+      neighbor = neighbors.find((neighbor) => neighbor.email === user.email);
+    }
+    
+    return neighbor;
   };
 
   return (

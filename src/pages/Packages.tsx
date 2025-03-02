@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { usePackages } from '@/context/PackageContext';
 import { useAuth } from '@/context/auth';
@@ -43,7 +44,8 @@ const Packages = () => {
       console.log("Vecino actual encontrado:", currentNeighbor);
       
       if (currentNeighbor) {
-        const vecinoPaquetes = getNeighborPackages(user.id);
+        // Use the neighbor_id from the current neighbor to get packages
+        const vecinoPaquetes = getNeighborPackages(currentNeighbor.id);
         console.log("Paquetes del vecino:", vecinoPaquetes);
         setUserPackages(vecinoPaquetes);
       } else {
