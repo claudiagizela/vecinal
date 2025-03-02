@@ -80,6 +80,7 @@ const PackageList: React.FC<PackageListProps> = ({
                 onDelete={onDelete ? confirmDelete : undefined}
                 onMarkDelivered={onMarkDelivered}
                 onMarkPending={onMarkPending}
+                onResendNotification={onResendNotification}
                 isVecinoView={isVecinoView}
               />
             ))}

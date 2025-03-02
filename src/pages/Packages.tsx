@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { usePackages } from '@/context/PackageContext';
 import { useAuth } from '@/context/auth';
+import { useNeighbors } from '@/context/NeighborContext';
 import Header from '@/components/Header';
 import Sidebar from '@/components/Sidebar';
 import PackageForm from '@/components/PackageForm';
@@ -24,18 +25,35 @@ const Packages = () => {
     markAsDelivered, 
     markAsPending,
     getNeighborPackages,
+    resendNotification,
     loading 
   } = usePackages();
   const { user } = useAuth();
+  const { getCurrentUserNeighbor } = useNeighbors();
   const [formOpen, setFormOpen] = useState(false);
   const [currentPackageId, setCurrentPackageId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'pending' | 'delivered'>('pending');
+  const [userPackages, setUserPackages] = useState(packages);
 
   const isVecino = user?.user_metadata?.role === 'vecino';
   
-  const userPackages = isVecino && user?.id 
-    ? getNeighborPackages(user.id) 
-    : packages;
+  useEffect(() => {
+    if (isVecino && user?.id) {
+      const currentNeighbor = getCurrentUserNeighbor();
+      console.log("Vecino actual encontrado:", currentNeighbor);
+      
+      if (currentNeighbor) {
+        const vecinoPaquetes = getNeighborPackages(user.id);
+        console.log("Paquetes del vecino:", vecinoPaquetes);
+        setUserPackages(vecinoPaquetes);
+      } else {
+        console.log("No se encontró perfil de vecino para:", user.email);
+        setUserPackages([]);
+      }
+    } else {
+      setUserPackages(packages);
+    }
+  }, [isVecino, user, packages, getCurrentUserNeighbor, getNeighborPackages]);
 
   const filteredPackages = userPackages.filter(pkg => {
     if (activeTab === 'pending') return !pkg.delivered_date;
@@ -169,6 +187,7 @@ const Packages = () => {
               onDelete={!isVecino ? deletePackage : undefined}
               onMarkDelivered={isVecino || !isVecino ? markAsDelivered : undefined}
               onMarkPending={!isVecino ? markAsPending : undefined}
+              onResendNotification={!isVecino ? resendNotification : undefined}
             />
           </div>
         </main>

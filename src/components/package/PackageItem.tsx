@@ -16,6 +16,7 @@ interface PackageItemProps {
   onDelete?: (id: string) => void;
   onMarkDelivered?: (id: string) => void;
   onMarkPending?: (id: string) => void;
+  onResendNotification?: (id: string) => void;
   isVecinoView?: boolean;
 }
 
@@ -25,6 +26,7 @@ const PackageItem: React.FC<PackageItemProps> = ({
   onDelete,
   onMarkDelivered,
   onMarkPending,
+  onResendNotification,
   isVecinoView,
 }) => {
   const [detailsOpen, setDetailsOpen] = useState(false);
@@ -130,6 +132,7 @@ const PackageItem: React.FC<PackageItemProps> = ({
                   onMarkPending={onMarkPending ? () => onMarkPending(pkg.id) : undefined}
                   onEdit={onEdit ? () => onEdit(pkg.id) : undefined}
                   onDelete={onDelete ? () => onDelete(pkg.id) : undefined}
+                  onResendNotification={onResendNotification ? () => onResendNotification(pkg.id) : undefined}
                 />
               )}
             </div>

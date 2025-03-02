@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Package, PackageFormData } from '@/types/package';
 import { toast } from '@/components/ui/use-toast';
@@ -18,7 +19,7 @@ export { usePackages } from '@/hooks/usePackageContext';
 export const PackageProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [packages, setPackages] = useState<Package[]>([]);
   const [loading, setLoading] = useState(true);
-  const { neighbors } = useNeighbors();
+  const { neighbors, getCurrentUserNeighbor } = useNeighbors();
 
   useEffect(() => {
     loadPackages();
@@ -137,20 +138,35 @@ export const PackageProvider: React.FC<{ children: React.ReactNode }> = ({ child
   };
 
   const getNeighborPackages = (userId: string) => {
+    // Primero, intentar obtener el neighbor actual del usuario logueado
+    const currentNeighbor = getCurrentUserNeighbor();
+    
+    if (currentNeighbor) {
+      console.log("Vecino encontrado por getCurrentUserNeighbor:", currentNeighbor);
+      return enrichedPackages.filter((pkg) => pkg.neighbor_id === currentNeighbor.id);
+    }
+    
+    // Si no encuentra el vecino por la función de context, buscar por las estrategias alternativas
     const neighbor = neighbors.find(n => n.id === userId);
     
     if (!neighbor) {
+      console.log("Buscando vecino por email:", userId);
       const neighborByEmail = neighbors.find(
         n => n.email && n.email.toLowerCase() === userId.toLowerCase()
       );
       
       if (neighborByEmail) {
+        console.log("Vecino encontrado por email:", neighborByEmail);
         return enrichedPackages.filter((pkg) => pkg.neighbor_id === neighborByEmail.id);
       }
       
+      console.log("No se encontró vecino para el usuario:", userId);
+      console.log("Vecinos disponibles:", neighbors.map(n => ({ id: n.id, email: n.email })));
+      console.log("Paquetes disponibles:", enrichedPackages.map(p => ({ id: p.id, neighbor_id: p.neighbor_id })));
       return [];
     }
     
+    console.log("Vecino encontrado por ID:", neighbor);
     return enrichedPackages.filter((pkg) => pkg.neighbor_id === neighbor.id);
   };
 
