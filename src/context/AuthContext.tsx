@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { User, Session } from '@supabase/supabase-js';
@@ -32,18 +31,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const [devModeEnabled, setDevModeEnabled] = useState(() => {
-    // Inicializar desde localStorage si existe
     const saved = localStorage.getItem('devModeEnabled');
     return saved ? JSON.parse(saved) : false;
   });
 
   useEffect(() => {
-    // Guardar en localStorage cuando cambie
     localStorage.setItem('devModeEnabled', JSON.stringify(devModeEnabled));
   }, [devModeEnabled]);
 
   useEffect(() => {
-    // Establecer la sesión actual
     const setInitialSession = async () => {
       try {
         const { data: { session }, error } = await supabase.auth.getSession();
@@ -59,23 +55,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     };
 
-    // Llamar a la función
     setInitialSession();
 
-    // Escuchar los cambios de autenticación
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
       setUser(session?.user || null);
       setLoading(false);
     });
 
-    // Verificar si hay un token de recuperación en la URL (como hash)
     const handleRecoveryToken = async () => {
       const hash = window.location.hash;
-      if (hash && hash.includes('type=recovery')) {
-        // Limpiamos el hash de la URL para que no quede expuesto
+      if (hash && (hash.includes('type=recovery') || hash.includes('type=signup'))) {
         window.location.hash = '';
-        
         try {
           setLoading(true);
           const { data, error } = await supabase.auth.refreshSession();
@@ -86,13 +77,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
           toast({
             title: "Sesión verificada",
-            description: "Ahora puedes establecer una nueva contraseña",
+            description: hash.includes('type=recovery') 
+              ? "Ahora puedes establecer una nueva contraseña" 
+              : "Correo verificado correctamente",
           });
         } catch (error: any) {
-          console.error("Error al procesar token de recuperación:", error);
+          console.error("Error al procesar token:", error);
           toast({
-            title: "Error de recuperación",
-            description: error.message || "Error al procesar el enlace de recuperación",
+            title: "Error de verificación",
+            description: error.message || "Error al procesar el enlace",
             variant: "destructive"
           });
         } finally {
@@ -103,7 +96,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     handleRecoveryToken();
 
-    // Limpiar la suscripción
     return () => subscription.unsubscribe();
   }, []);
 
@@ -219,6 +211,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         throw error;
       }
 
+      window.location.hash = '';
       toast({
         title: "Contraseña actualizada",
         description: "Tu contraseña ha sido actualizada correctamente.",

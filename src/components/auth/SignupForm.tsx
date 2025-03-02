@@ -26,7 +26,7 @@ const signupSchema = z.object({
 type SignupFormValues = z.infer<typeof signupSchema>;
 
 const SignupForm: React.FC = () => {
-  const { signUp, loading } = useAuth();
+  const { signUp, loading, session } = useAuth();
 
   const form = useForm<SignupFormValues>({
     resolver: zodResolver(signupSchema),
@@ -43,6 +43,21 @@ const SignupForm: React.FC = () => {
     signUp(data.email, data.password, data.userType);
   };
 
+  // Check if we have a signup token (this would come from verification email)
+  const isVerificationMode = session?.user && window.location.hash.includes('type=signup');
+
+  if (isVerificationMode) {
+    return (
+      <div className="space-y-4">
+        <div className="text-center space-y-2">
+          <h2 className="text-2xl font-bold">¡Correo verificado!</h2>
+          <p className="text-muted-foreground">Tu correo electrónico ha sido verificado correctamente.</p>
+          <p className="text-muted-foreground">Ya puedes iniciar sesión con tus credenciales.</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -55,6 +70,7 @@ const SignupForm: React.FC = () => {
               <FormControl>
                 <Input 
                   placeholder="usuario123" 
+                  autoComplete="username"
                   {...field} 
                 />
               </FormControl>
@@ -73,6 +89,7 @@ const SignupForm: React.FC = () => {
                 <Input 
                   type="email" 
                   placeholder="tu@email.com" 
+                  autoComplete="email"
                   {...field} 
                 />
               </FormControl>
@@ -116,6 +133,7 @@ const SignupForm: React.FC = () => {
                 <Input 
                   type="password" 
                   placeholder="******" 
+                  autoComplete="new-password"
                   {...field} 
                 />
               </FormControl>
@@ -134,6 +152,7 @@ const SignupForm: React.FC = () => {
                 <Input 
                   type="password" 
                   placeholder="******" 
+                  autoComplete="new-password"
                   {...field} 
                 />
               </FormControl>
