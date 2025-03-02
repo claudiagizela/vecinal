@@ -8,7 +8,8 @@ export type ProcessingErrorType =
   | 'neighbor_not_found' 
   | 'unclear_image' 
   | 'generic_error'
-  | 'low_confidence';
+  | 'low_confidence'
+  | 'duplicate_image';
 
 interface ProcessedImage {
   id: number;
@@ -35,6 +36,10 @@ export function useBulkPackageProcessor() {
     return processedImages.find(i => i.id === id)?.image || '';
   };
 
+  const isDuplicateImage = (newImage: string): boolean => {
+    return processedImages.some(item => item.image === newImage);
+  };
+
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       setIsProcessing(true);
@@ -46,15 +51,30 @@ export function useBulkPackageProcessor() {
         reader.onloadend = () => {
           const base64 = reader.result as string;
           
-          newProcessedImages.push({
-            id: Date.now() + index,
-            image: base64,
-            status: 'processing'
-          });
+          if (isDuplicateImage(base64)) {
+            newProcessedImages.push({
+              id: Date.now() + index,
+              image: base64,
+              status: 'error',
+              errorMessage: 'Esta etiqueta está repetida',
+              errorType: 'duplicate_image'
+            });
+          } else {
+            newProcessedImages.push({
+              id: Date.now() + index,
+              image: base64,
+              status: 'processing'
+            });
+          }
           
           if (newProcessedImages.length === newFiles.length) {
             setProcessedImages(prev => [...prev, ...newProcessedImages]);
-            processLabelImages(newProcessedImages);
+            const nonDuplicates = newProcessedImages.filter(img => img.status === 'processing');
+            if (nonDuplicates.length > 0) {
+              processLabelImages(nonDuplicates);
+            } else {
+              setIsProcessing(false);
+            }
           }
         };
         reader.readAsDataURL(file);
