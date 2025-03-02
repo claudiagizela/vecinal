@@ -119,8 +119,6 @@ export const authService = {
       const redirectTo = `${window.location.origin}/reset`;
       console.log("[resetPassword] URL de redirección configurada:", redirectTo);
       
-      // Limpiamos cualquier toast anterior que pudiera interferir
-      
       // Llamamos a la API de Supabase para restablecer contraseña
       const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: redirectTo,
@@ -132,14 +130,11 @@ export const authService = {
       }
 
       console.log("[resetPassword] Respuesta de Supabase:", data);
-      
-      // En desarrollo, Supabase puede no enviar correos reales
       console.log("[resetPassword] Solicitud procesada correctamente");
       
       return { success: true };
     } catch (error: any) {
       console.error("[resetPassword] Error capturado:", error);
-      // No mostramos toast aquí para evitar duplicados, dejamos que el componente lo maneje
       throw error;
     }
   },

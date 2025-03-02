@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
 import { toast } from '@/components/ui/use-toast';
 import { useNavigate } from 'react-router-dom';
+import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 
 const resetSchema = z.object({
   email: z.string().email({ message: 'Email inválido' }),
@@ -40,12 +41,12 @@ const ResetPassword = () => {
       
       await resetPassword(data.email);
       
-      // Si no hay error, mostramos el éxito y actualizamos el estado
       toast({
         title: "Correo enviado",
         description: "Se ha enviado un enlace de restablecimiento a tu correo electrónico.",
       });
       
+      console.log("Correo enviado exitosamente, actualizando UI");
       setIsResetSent(true);
       
     } catch (error) {
@@ -73,13 +74,13 @@ const ResetPassword = () => {
         
         {isResetSent ? (
           <div className="space-y-4">
-            <div className="bg-green-50 border border-green-200 rounded-md p-4 text-center">
-              <h3 className="font-medium text-green-800">Correo Enviado</h3>
-              <p className="mt-2 text-green-700">
+            <Alert variant="success">
+              <AlertTitle>Correo Enviado</AlertTitle>
+              <AlertDescription>
                 Se ha enviado un enlace de restablecimiento a tu correo electrónico.
                 Por favor revisa tu bandeja de entrada.
-              </p>
-            </div>
+              </AlertDescription>
+            </Alert>
             <Button onClick={() => navigate('/auth')} className="w-full">
               Volver a Iniciar Sesión
             </Button>
