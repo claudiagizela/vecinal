@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -9,7 +10,10 @@ import { useAuth } from '@/context/auth';
 const Sidebar = () => {
   const [collapsed, setCollapsed] = useState(false);
   const location = useLocation();
-  const { signOut } = useAuth();
+  const { signOut, user } = useAuth();
+
+  // Get user's full name from metadata or fallback to username
+  const fullName = user?.user_metadata?.full_name || user?.user_metadata?.username || 'Usuario';
 
   const navItems = [
     {
@@ -42,7 +46,7 @@ const Sidebar = () => {
       {/* Sidebar Header */}
       <div className="p-4 flex items-center justify-between">
         {!collapsed && (
-          <h2 className="font-semibold text-lg">Condominio</h2>
+          <h2 className="font-semibold text-lg overflow-hidden text-ellipsis">¡Hola {fullName}!</h2>
         )}
         <Button 
           variant="ghost" 
