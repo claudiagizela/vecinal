@@ -33,9 +33,11 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
+    console.log("Recibida solicitud de notificación de paquete");
     const { neighbor, package: pkg, notificationType }: PackageNotificationRequest = await req.json();
 
     if (!neighbor.email) {
+      console.error("No se proporcionó un correo electrónico");
       return new Response(
         JSON.stringify({ error: "No se proporcionó un correo electrónico" }),
         {
@@ -44,6 +46,8 @@ const handler = async (req: Request): Promise<Response> => {
         }
       );
     }
+
+    console.log(`Enviando notificación a: ${neighbor.email}, tipo: ${notificationType}`);
 
     // Format dates for display
     const receivedDate = new Date(pkg.received_date).toLocaleDateString('es-MX', {
@@ -114,7 +118,7 @@ const handler = async (req: Request): Promise<Response> => {
       html: html,
     });
 
-    console.log("Email sent successfully:", emailResponse);
+    console.log("Email enviado con éxito:", emailResponse);
 
     return new Response(JSON.stringify(emailResponse), {
       status: 200,

@@ -64,6 +64,14 @@ export const sendPackageNotification = async (
     
     console.log(`Notificación de paquete (${notificationType}) enviada con éxito:`, responseData);
     
+    // Mostrar notificación de éxito
+    toast({
+      title: "Notificación enviada",
+      description: notificationType === 'received' 
+        ? "Se ha enviado un correo al vecino notificando la recepción del paquete."
+        : "Se ha enviado un correo al vecino confirmando la entrega del paquete.",
+    });
+    
     return responseData;
   } catch (error) {
     console.error(`Error sending ${notificationType} notification email:`, error);
