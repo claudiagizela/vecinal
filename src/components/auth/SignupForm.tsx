@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
@@ -46,7 +45,6 @@ const SignupForm: React.FC = () => {
     signUp(data.email, data.password, data.userType, data.username, data.fullName);
   };
 
-  // Check if we have a signup token (this would come from verification email)
   const isVerificationMode = session?.user && window.location.hash.includes('type=signup');
 
   if (isVerificationMode) {
