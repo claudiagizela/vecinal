@@ -26,11 +26,11 @@ const Auth = () => {
             <TabsTrigger value="signup">Registrarse</TabsTrigger>
           </TabsList>
           
-          <TabsContent value="login">
+          <TabsContent value="login" className="mt-0">
             <LoginForm />
           </TabsContent>
           
-          <TabsContent value="signup">
+          <TabsContent value="signup" className="mt-0">
             <SignupForm />
           </TabsContent>
         </Tabs>

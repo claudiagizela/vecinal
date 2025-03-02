@@ -16,6 +16,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { toast } from '@/components/ui/use-toast';
 
 const loginSchema = z.object({
   email: z.string().email({ message: 'Email inválido' }),
@@ -49,8 +50,13 @@ const LoginForm: React.FC = () => {
     },
   });
 
-  const onSubmit = (data: LoginFormValues) => {
-    signIn(data.email, data.password);
+  const onSubmit = async (data: LoginFormValues) => {
+    try {
+      await signIn(data.email, data.password);
+    } catch (error) {
+      console.error('Error de inicio de sesión:', error);
+      // El error ya es manejado por el contexto de autenticación
+    }
   };
 
   const onResetPassword = async (data: ResetPasswordFormValues) => {
@@ -59,6 +65,13 @@ const LoginForm: React.FC = () => {
       await resetPassword(data.email);
       setIsResetPasswordOpen(false);
       resetForm.reset();
+      toast({
+        title: "Correo enviado",
+        description: "Se ha enviado un correo con instrucciones para restablecer tu contraseña.",
+      });
+    } catch (error) {
+      console.error('Error al restablecer contraseña:', error);
+      // El error ya es manejado por el contexto de autenticación
     } finally {
       setResetLoading(false);
     }
@@ -79,6 +92,7 @@ const LoginForm: React.FC = () => {
                     type="email" 
                     placeholder="tu@email.com" 
                     {...field} 
+                    autoComplete="email"
                   />
                 </FormControl>
                 <FormMessage />
@@ -97,6 +111,7 @@ const LoginForm: React.FC = () => {
                     type="password" 
                     placeholder="******" 
                     {...field} 
+                    autoComplete="current-password"
                   />
                 </FormControl>
                 <FormMessage />
@@ -143,6 +158,7 @@ const LoginForm: React.FC = () => {
                         type="email" 
                         placeholder="tu@email.com" 
                         {...field} 
+                        autoComplete="email"
                       />
                     </FormControl>
                     <FormMessage />
