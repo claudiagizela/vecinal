@@ -1,15 +1,16 @@
+
 import React from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/context/auth';
 import { Button } from './ui/button';
-import { Shield } from 'lucide-react';
+import { Shield, XCircle } from 'lucide-react';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
-  const { user, loading, devModeEnabled, toggleDevMode } = useAuth();
+  const { user, loading, devModeEnabled, toggleDevMode, signOut } = useAuth();
 
   if (loading) {
     return (
@@ -26,11 +27,24 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
     return <Navigate to="/auth" replace />;
   }
 
+  const handleForceLogout = async () => {
+    await signOut();
+    toggleDevMode();  // This will disable dev mode after logout
+  };
+
   return (
     <>
       {children}
       {!user && devModeEnabled && (
-        <div className="fixed bottom-4 right-4 z-50">
+        <div className="fixed bottom-4 right-4 z-50 flex flex-col gap-2">
+          <Button 
+            onClick={handleForceLogout} 
+            variant="destructive" 
+            className="flex items-center gap-2"
+          >
+            <XCircle size={16} />
+            Forzar Cierre de Sesión
+          </Button>
           <Button 
             onClick={toggleDevMode} 
             variant="outline" 
