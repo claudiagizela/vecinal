@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
 
@@ -13,7 +12,8 @@ export const authService = {
         options: {
           data: {
             role: userType,
-            username: username
+            username: username,
+            full_name: username
           },
           emailRedirectTo: window.location.origin + '/auth'
         }

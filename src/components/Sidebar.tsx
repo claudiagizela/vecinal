@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
@@ -12,8 +12,19 @@ const Sidebar = () => {
   const location = useLocation();
   const { signOut, user } = useAuth();
 
+  // Logging user data for debugging
+  useEffect(() => {
+    if (user) {
+      console.log("User data in Sidebar:", user);
+      console.log("User metadata:", user.user_metadata);
+    }
+  }, [user]);
+
   // Get user's full name from metadata or fallback to username
-  const fullName = user?.user_metadata?.full_name || user?.user_metadata?.username || 'Usuario';
+  const fullName = user?.user_metadata?.full_name || 
+                   user?.user_metadata?.username || 
+                   user?.email?.split('@')[0] || 
+                   'Usuario';
 
   const navItems = [
     {

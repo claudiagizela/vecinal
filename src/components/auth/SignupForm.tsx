@@ -40,6 +40,7 @@ const SignupForm: React.FC = () => {
   });
 
   const onSubmit = (data: SignupFormValues) => {
+    console.log("Signup form data:", data); // Log form data for debugging
     signUp(data.email, data.password, data.userType, data.username);
   };
 
