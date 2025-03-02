@@ -27,6 +27,7 @@ type SignupFormValues = z.infer<typeof signupSchema>;
 
 const SignupForm: React.FC = () => {
   const { signUp, loading, session } = useAuth();
+  const [selectedUserType, setSelectedUserType] = React.useState<'guardia' | 'vecino' | undefined>(undefined);
 
   const form = useForm<SignupFormValues>({
     resolver: zodResolver(signupSchema),
@@ -46,6 +47,11 @@ const SignupForm: React.FC = () => {
   };
 
   const isVerificationMode = session?.user && window.location.hash.includes('type=signup');
+
+  const handleUserTypeChange = (value: 'guardia' | 'vecino') => {
+    setSelectedUserType(value);
+    form.setValue('userType', value);
+  };
 
   if (isVerificationMode) {
     return (
@@ -106,7 +112,7 @@ const SignupForm: React.FC = () => {
             <FormItem>
               <FormLabel>Tipo de Usuario</FormLabel>
               <Select
-                onValueChange={field.onChange}
+                onValueChange={(value) => handleUserTypeChange(value as 'guardia' | 'vecino')}
                 defaultValue={field.value}
               >
                 <FormControl>
@@ -120,6 +126,11 @@ const SignupForm: React.FC = () => {
                 </SelectContent>
               </Select>
               <FormMessage />
+              {selectedUserType === 'vecino' && (
+                <p className="text-xs text-muted-foreground mt-1">
+                  Como vecino, se creará automáticamente un perfil básico. Podrás completar tus datos después de iniciar sesión.
+                </p>
+              )}
             </FormItem>
           )}
         />

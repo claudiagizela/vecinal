@@ -3,6 +3,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Neighbor, NeighborFormData } from '@/types/neighbor';
 import { toast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/context/auth';
 
 interface NeighborContextType {
   neighbors: Neighbor[];
@@ -10,6 +11,7 @@ interface NeighborContextType {
   updateNeighbor: (id: string, data: NeighborFormData) => Promise<void>;
   deleteNeighbor: (id: string) => Promise<void>;
   getNeighbor: (id: string) => Neighbor | undefined;
+  getCurrentUserNeighbor: () => Neighbor | undefined;
   loading: boolean;
 }
 
@@ -26,6 +28,7 @@ export const useNeighbors = () => {
 export const NeighborProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [neighbors, setNeighbors] = useState<Neighbor[]>([]);
   const [loading, setLoading] = useState(true);
+  const { user } = useAuth();
 
   // Load data from Supabase on mount
   useEffect(() => {
@@ -100,7 +103,7 @@ export const NeighborProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       
       setNeighbors((prev) => 
         prev.map((neighbor) => 
-          neighbor.id === id ? { ...data, id } : neighbor
+          neighbor.id === id ? { ...neighbor, ...data } : neighbor
         )
       );
       
@@ -153,6 +156,14 @@ export const NeighborProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     return neighbors.find((neighbor) => neighbor.id === id);
   };
 
+  // New function to get the current user's neighbor profile
+  const getCurrentUserNeighbor = () => {
+    if (!user) return undefined;
+    
+    // Find neighbor with matching email
+    return neighbors.find((neighbor) => neighbor.email === user.email);
+  };
+
   return (
     <NeighborContext.Provider
       value={{
@@ -161,6 +172,7 @@ export const NeighborProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         updateNeighbor,
         deleteNeighbor,
         getNeighbor,
+        getCurrentUserNeighbor,
         loading,
       }}
     >
