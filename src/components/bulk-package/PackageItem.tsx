@@ -78,6 +78,9 @@ const PackageItem: React.FC<PackageItemProps> = ({
     }
   };
 
+  // Check if confidence score is high enough to be ready for registration
+  const isReadyToRegister = item.status === 'success' && (item.confidenceScore || 0) >= 80;
+
   return (
     <div className="border rounded-lg overflow-hidden">
       <div className="grid grid-cols-3 gap-4">
@@ -121,9 +124,15 @@ const PackageItem: React.FC<PackageItemProps> = ({
             
             {item.status === 'success' && (
               <div className="flex flex-col gap-1">
-                <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
-                  Listo para registrar
-                </Badge>
+                {isReadyToRegister ? (
+                  <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                    Listo para registrar
+                  </Badge>
+                ) : (
+                  <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">
+                    Requiere revisión
+                  </Badge>
+                )}
                 <div className="flex gap-1 mt-1">
                   <Button variant="outline" size="sm" className="h-6 px-2" onClick={() => onRetry(item.id)}>
                     <RefreshCw size={12} className="mr-1" /> Reintentar
