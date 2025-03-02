@@ -12,6 +12,7 @@ import { useAuth } from '@/context/auth';
 
 const signupSchema = z.object({
   username: z.string().min(3, { message: 'El nombre de usuario debe tener al menos 3 caracteres' }),
+  fullName: z.string().min(3, { message: 'El nombre completo debe tener al menos 3 caracteres' }),
   email: z.string().email({ message: 'Email inválido' }),
   password: z.string().min(6, { message: 'La contraseña debe tener al menos 6 caracteres' }),
   confirmPassword: z.string(),
@@ -32,6 +33,7 @@ const SignupForm: React.FC = () => {
     resolver: zodResolver(signupSchema),
     defaultValues: {
       username: '',
+      fullName: '',
       email: '',
       password: '',
       confirmPassword: '',
@@ -41,7 +43,7 @@ const SignupForm: React.FC = () => {
 
   const onSubmit = (data: SignupFormValues) => {
     console.log("Signup form data:", data); // Log form data for debugging
-    signUp(data.email, data.password, data.userType, data.username);
+    signUp(data.email, data.password, data.userType, data.username, data.fullName);
   };
 
   // Check if we have a signup token (this would come from verification email)
@@ -72,6 +74,24 @@ const SignupForm: React.FC = () => {
                 <Input 
                   placeholder="usuario123" 
                   autoComplete="username"
+                  {...field} 
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        
+        <FormField
+          control={form.control}
+          name="fullName"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Nombre Completo</FormLabel>
+              <FormControl>
+                <Input 
+                  placeholder="Juan Pérez" 
+                  autoComplete="name"
                   {...field} 
                 />
               </FormControl>

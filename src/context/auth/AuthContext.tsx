@@ -1,3 +1,4 @@
+
 import React, { createContext, useState, useEffect } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -88,10 +89,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return () => subscription.unsubscribe();
   }, []);
 
-  const signUp = async (email: string, password: string, userType: 'vecino' | 'guardia', username: string) => {
+  const signUp = async (email: string, password: string, userType: 'vecino' | 'guardia', username: string, fullName: string) => {
     setLoading(true);
     try {
-      await authService.signUp(email, password, userType, username);
+      await authService.signUp(email, password, userType, username, fullName);
     } finally {
       setLoading(false);
     }

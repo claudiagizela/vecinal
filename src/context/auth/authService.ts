@@ -2,10 +2,14 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
 
 export const authService = {
-  signUp: async (email: string, password: string, userType: 'vecino' | 'guardia', username: string) => {
+  signUp: async (
+    email: string, 
+    password: string, 
+    userType: 'vecino' | 'guardia', 
+    username: string,
+    fullName: string
+  ) => {
     try {
-      console.log(`Intentando registrar usuario: ${email}, tipo: ${userType}, username: ${username}`);
-      
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -13,42 +17,31 @@ export const authService = {
           data: {
             role: userType,
             username: username,
-            full_name: username
+            full_name: fullName
           },
           emailRedirectTo: window.location.origin + '/auth'
         }
       });
 
       if (error) {
-        console.error("Error en signUp:", error);
+        console.error("Error during signup:", error.message);
         throw error;
       }
 
-      console.log("Respuesta de signUp:", data);
+      console.log("Signup successful, user data:", data);
+      console.log("User metadata:", data.user?.user_metadata);
 
-      // Check if user needs to confirm email
-      if (data.user && data.user.identities && data.user.identities.length === 0) {
-        // This indicates the user already exists but hasn't confirmed their email
-        console.log("Usuario ya existe pero no ha confirmado email");
-        toast({
-          title: "Email ya registrado",
-          description: "Esta dirección de correo ya está registrada pero no confirmada. Se ha enviado un nuevo correo de verificación.",
-          variant: "destructive"
-        });
-      } else {
-        console.log("Registro exitoso, correo de confirmación enviado");
-        toast({
-          title: "Registro exitoso",
-          description: "Se ha enviado un correo de confirmación a tu dirección de email.",
-        });
-      }
-      
+      toast({
+        title: "Registro exitoso",
+        description: "Se ha enviado un correo de verificación. Por favor revisa tu bandeja de entrada.",
+      });
+
       return data;
     } catch (error: any) {
-      console.error("Error detallado en signUp:", error);
+      console.error("Signup error:", error);
       toast({
-        title: "Error al registrarse",
-        description: error.message || "Ha ocurrido un error al crear la cuenta.",
+        title: "Error de registro",
+        description: error.message || "Ha ocurrido un error durante el registro",
         variant: "destructive"
       });
       throw error;
