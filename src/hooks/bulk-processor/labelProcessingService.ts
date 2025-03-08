@@ -1,9 +1,8 @@
-
 import { ProcessedImage, ProcessingErrorType } from './types';
 import { getConsistentConfidenceScore } from './imageUtils';
 import { PackageType, Company, PackageFormData } from '@/types/package';
 import { Neighbor } from '@/types/neighbor';
-import { createClient } from '@/integrations/supabase/client';
+import { supabase } from '@/integrations/supabase/client';
 
 const extractNeighborInfo = (text: string, neighbors: Neighbor[]): Neighbor | null => {
   // Convert text to lowercase for case-insensitive matching
@@ -54,8 +53,6 @@ const detectPackageType = (text: string): PackageType => {
 };
 
 const processImageWithCloudVision = async (image: string): Promise<string> => {
-  const supabase = createClient();
-  
   try {
     const { data, error } = await supabase.functions.invoke('process-label-image', {
       body: { imageBase64: image }
